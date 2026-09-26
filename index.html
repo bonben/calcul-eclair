@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Calcul Éclair</title>
+  <meta name="description" content="Calcul mental gamifié : vitesse, combos, points.">
+  <meta name="theme-color" content="#0d0b1e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ===== ACCUEIL ===== -->
+    <section id="screen-home" class="screen active">
+      <header class="profile">
+        <div class="profile-top">
+          <div>
+            <div class="lvl-badge">Niv. <span id="p-level">1</span></div>
+            <div class="p-title" id="p-title">Recrue</div>
+          </div>
+          <div class="streak" id="p-streak" title="Jours d'affilée">🔥 <span>0</span></div>
+        </div>
+        <div class="xpbar"><div class="xpfill" id="p-xpfill"></div></div>
+        <div class="xptext" id="p-xptext">0 / 300 XP</div>
+      </header>
+
+      <h1 class="logo">CALCUL<br><span>ÉCLAIR</span> ⚡</h1>
+
+      <div class="modes">
+        <button class="mode mode-sprint" data-mode="sprint">
+          <span class="mode-ico">⏱️</span>
+          <span class="mode-txt"><b>Sprint 60 s</b><small>Un max de calculs en 1 minute</small></span>
+          <span class="mode-best" id="best-sprint"></span>
+        </button>
+        <button class="mode mode-survie" data-mode="survie">
+          <span class="mode-ico">💀</span>
+          <span class="mode-txt"><b>Survie</b><small>3 vies, ça accélère…</small></span>
+          <span class="mode-best" id="best-survie"></span>
+        </button>
+        <button class="mode mode-daily" data-mode="daily">
+          <span class="mode-ico">📅</span>
+          <span class="mode-txt"><b>Défi du jour</b><small>20 calculs, chrono</small></span>
+          <span class="mode-best" id="best-daily"></span>
+        </button>
+        <button class="mode mode-tricks" data-go="tricks">
+          <span class="mode-ico">🧠</span>
+          <span class="mode-txt"><b>Astuces de pro</b><small>Apprends les techniques qui tuent</small></span>
+          <span class="mode-best" id="best-tricks"></span>
+        </button>
+      </div>
+
+      <nav class="bottom-nav">
+        <button data-go="badges">🏆 Badges</button>
+        <button data-go="stats">📊 Stats</button>
+        <button data-go="settings">⚙️ Réglages</button>
+      </nav>
+    </section>
+
+    <!-- ===== ASTUCES ===== -->
+    <section id="screen-tricks" class="screen">
+      <div class="topbar"><button class="back" data-go="home">←</button><h2>Astuces de pro</h2></div>
+      <div id="tricks-list" class="list"></div>
+    </section>
+
+    <section id="screen-trick" class="screen">
+      <div class="topbar"><button class="back" data-go="tricks">←</button><h2 id="trick-name"></h2></div>
+      <div class="card trick-card">
+        <p id="trick-how"></p>
+        <div class="trick-ex" id="trick-ex"></div>
+      </div>
+      <button class="btn-big" id="trick-start">C'est parti ! 🚀</button>
+    </section>
+
+    <!-- ===== JEU ===== -->
+    <section id="screen-game" class="screen">
+      <div class="hud">
+        <button class="quit" id="quit">✕</button>
+        <div class="hud-mid">
+          <div class="hud-info" id="hud-info"></div>
+          <div class="timebar"><div class="timefill" id="timefill"></div></div>
+        </div>
+        <div class="hud-score"><span id="score">0</span><small>pts</small></div>
+      </div>
+
+      <div class="combo" id="combo"></div>
+
+      <div class="stage" id="stage">
+        <div class="tag" id="qtag"></div>
+        <div class="question" id="question"></div>
+        <div class="answer" id="answer">&nbsp;</div>
+        <div class="feedback" id="feedback">&nbsp;</div>
+      </div>
+
+      <div class="keypad" id="keypad">
+        <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+        <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+        <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+        <button data-k="skip" class="k-alt">passer</button><button data-k="0">0</button><button data-k="del" class="k-alt">⌫</button>
+      </div>
+
+      <div class="countdown" id="countdown"></div>
+    </section>
+
+    <!-- ===== RÉSULTATS ===== -->
+    <section id="screen-results" class="screen">
+      <div class="res-head">
+        <div class="res-mode" id="res-mode"></div>
+        <div class="res-record" id="res-record">🎉 NOUVEAU RECORD !</div>
+        <div class="res-score" id="res-score">0</div>
+        <div class="res-stars" id="res-stars"></div>
+      </div>
+      <div class="res-grid">
+        <div><b id="res-correct">0</b><small>justes</small></div>
+        <div><b id="res-acc">0%</b><small>précision</small></div>
+        <div><b id="res-rt">–</b><small>réaction moy.</small></div>
+        <div><b id="res-combo">0</b><small>meilleur combo</small></div>
+      </div>
+      <div class="res-xp">
+        <div class="res-xp-line"><span id="res-xpgain">+0 XP</span><span id="res-lvl"></span></div>
+        <div class="xpbar"><div class="xpfill" id="res-xpfill"></div></div>
+      </div>
+      <div class="res-badges" id="res-badges"></div>
+      <div class="res-tip" id="res-tip"></div>
+      <div class="res-actions">
+        <button class="btn-big" id="res-again">Rejouer 🔁</button>
+        <button class="btn-ghost" id="res-home">Menu</button>
+      </div>
+    </section>
+
+    <!-- ===== BADGES ===== -->
+    <section id="screen-badges" class="screen">
+      <div class="topbar"><button class="back" data-go="home">←</button><h2>Badges</h2></div>
+      <div id="badges-list" class="badges"></div>
+    </section>
+
+    <!-- ===== STATS ===== -->
+    <section id="screen-stats" class="screen">
+      <div class="topbar"><button class="back" data-go="home">←</button><h2>Stats</h2></div>
+      <div id="stats-body" class="list"></div>
+    </section>
+
+    <!-- ===== RÉGLAGES ===== -->
+    <section id="screen-settings" class="screen">
+      <div class="topbar"><button class="back" data-go="home">←</button><h2>Réglages</h2></div>
+      <div class="list">
+        <div class="card">
+          <h3>Opérations</h3>
+          <label class="toggle"><input type="checkbox" data-op="add"> Additions (+)</label>
+          <label class="toggle"><input type="checkbox" data-op="sub"> Soustractions (−)</label>
+          <label class="toggle"><input type="checkbox" data-op="mul"> Multiplications (×)</label>
+          <label class="toggle"><input type="checkbox" data-op="div"> Divisions (÷)</label>
+        </div>
+        <div class="card">
+          <h3>Ambiance</h3>
+          <label class="toggle"><input type="checkbox" id="set-sound"> Sons</label>
+          <label class="toggle"><input type="checkbox" id="set-vibrate"> Vibrations</label>
+        </div>
+        <div class="card">
+          <h3>Niveau par opération</h3>
+          <p class="muted">Il s'ajuste tout seul pour que tu réussisses environ 8 calculs sur 10 : assez dur pour progresser, pas assez pour décourager.</p>
+          <div id="op-levels"></div>
+        </div>
+        <button class="btn-ghost danger" id="reset">Tout remettre à zéro</button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
