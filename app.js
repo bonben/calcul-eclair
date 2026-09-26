@@ -35,6 +35,7 @@ const DEFAULT_STATE = {
   ops: { add: true, sub: true, mul: true, div: true },
   sound: true,
   vibrate: true,
+  photos: true,
   best: { sprint: 0, survie: 0 },
   daily: { day: '', best: 0 },
   tricks: {},            // id -> étoiles (0..3)
@@ -240,6 +241,21 @@ const SFX = {
   end: () => [0, 4, 7, 12, 16].forEach((s, i) => tone(523 * Math.pow(2, s / 12), 0.18, 'triangle', 0.15, i * 0.09)),
   life: () => { tone(300, 0.15, 'square', 0.12); tone(200, 0.3, 'square', 0.12, 0.12); },
 };
+// ---------- Photos réactions ----------
+const PHOTO = { ok: new Image(), bad: new Image() };
+PHOTO.ok.src = 'img/content.webp';
+PHOTO.bad.src = 'img/pascontent.webp';
+function reaction(ok) {
+  if (!S.photos) return;
+  const el = $('#reaction');
+  const side = Math.random() < 0.5 ? 'left' : 'right';
+  el.src = (ok ? PHOTO.ok : PHOTO.bad).src;
+  el.className = 'reaction';
+  void el.offsetWidth; // relance l'animation même si la précédente n'est pas finie
+  el.style.setProperty('--rot', side === 'left' ? '-7deg' : '7deg');
+  el.style.setProperty('--dur', ok ? '600ms' : '850ms');
+  el.classList.add(side, 'go');
+}
 const buzz = (p) => { if (S.vibrate && navigator.vibrate) navigator.vibrate(p); };
 
 /* =========================================================
@@ -336,6 +352,7 @@ function renderSettings() {
   $$('[data-op]').forEach((c) => { c.checked = S.ops[c.dataset.op]; });
   $('#set-sound').checked = S.sound;
   $('#set-vibrate').checked = S.vibrate;
+  $('#set-photos').checked = S.photos;
   $('#op-levels').innerHTML = Object.keys(OP_SYM).map((op) => `
     <div class="op-lvl"><span style="width:24px">${OP_SYM[op]}</span><span class="bar"><i style="width:${(opLevel(op) / MAX_LV) * 100}%"></i></span><span>${opLevel(op)}/${MAX_LV}</span></div>`).join('');
 }
@@ -345,6 +362,7 @@ $$('[data-op]').forEach((c) => c.addEventListener('change', () => {
   save();
 }));
 $('#set-sound').addEventListener('change', (e) => { S.sound = e.target.checked; save(); });
+$('#set-photos').addEventListener('change', (e) => { S.photos = e.target.checked; save(); });
 $('#set-vibrate').addEventListener('change', (e) => { S.vibrate = e.target.checked; save(); if (S.vibrate) buzz(50); });
 $('#reset').addEventListener('click', () => {
   if (confirm('Effacer toute la progression (XP, records, badges) ?')) { S = structuredClone(DEFAULT_STATE); save(); show('home'); toast('Remis à zéro'); }
@@ -379,6 +397,7 @@ function startGame(mode, trick = null) {
   $('#feedback').innerHTML = '&nbsp;';
   $('#question').textContent = '';
   $('#qtag').classList.remove('show');
+  $('#reaction').className = 'reaction';
   $('#timefill').style.transform = 'scaleX(1)';
   $('#timefill').classList.remove('warn');
   $('#hud-info').textContent = '';
@@ -550,6 +569,7 @@ function answer(ok, timeout = false) {
     fb.className = 'feedback' + (rt < 1.2 ? ' fast' : '');
     fb.textContent = rt < 1 ? `⚡ ${rt.toFixed(2)} s — ÉCLAIR !` : rt < 2 ? `${rt.toFixed(2)} s — rapide !` : `${rt.toFixed(2)} s`;
     floatText(`+${pts}`);
+    reaction(true);
     bumpScore();
     SFX.ok(G.combo);
     if (mult > prevMult) { SFX.tier(); buzz([30, 40, 30]); sparks(18); } else if (G.combo >= 5) sparks(6);
@@ -570,6 +590,7 @@ function answer(ok, timeout = false) {
     $('#feedback').textContent = timeout ? '⏰ Trop tard !' : G.typed ? `✗ pas ${G.typed}` : 'passé';
     $('#screen-game').classList.remove('flash-red'); void $('#screen-game').offsetWidth; $('#screen-game').classList.add('flash-red');
     buzz(120);
+    reaction(false);
     if (G.mode === 'survie') {
       G.lives--; SFX.life(); updateHudInfo();
       if (G.lives <= 0) { setTimeout(endGame, 900); return; }

@@ -147,6 +147,22 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .feedback { font-size: 16px; font-weight: 800; margin-top: 8px; height: 22px; color: var(--muted); }
 .feedback.fast { color: var(--yellow); }
 
+/* Photo réaction : surgit du bas sur un côté, petit rebond, fondu rapide */
+.stage > .tag, .question, .answer, .feedback { position: relative; z-index: 1; }
+.question { text-shadow: 0 2px 14px rgba(13,11,30,.95); }
+.reaction { position: absolute; bottom: -16px; width: 72%; max-width: 330px; pointer-events: none; opacity: 0; z-index: 0;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.55)); transform-origin: 50% 100%; }
+.reaction.left { left: -8%; }
+.reaction.right { right: -8%; }
+.reaction.go { animation: react var(--dur, 600ms) ease-out forwards; }
+@keyframes react {
+  0%   { opacity: 0; transform: translateY(40%) scale(.7) rotate(calc(var(--rot) * 2.5)); }
+  14%  { opacity: 1; transform: translateY(0) scale(1.07) rotate(var(--rot)); }
+  28%  { transform: scale(1) rotate(var(--rot)); }
+  60%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(8%) scale(.96) rotate(var(--rot)); }
+}
+
 .float { position: absolute; font-weight: 900; font-size: 26px; color: var(--yellow); pointer-events: none; animation: floatUp .8s ease-out forwards; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
 @keyframes floatUp { to { transform: translateY(-80px) scale(1.2); opacity: 0; } }
 .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: spark .6s ease-out forwards; }
