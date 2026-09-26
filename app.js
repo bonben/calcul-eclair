@@ -87,7 +87,7 @@ const titleFor = (lvl) => TITLES.filter(([l]) => lvl >= l).pop()[1];
 const OP_SYM = { add: '+', sub: '−', mul: '×', div: '÷' };
 const OP_NAME = { add: 'Additions', sub: 'Soustractions', mul: 'Multiplications', div: 'Divisions' };
 const ADD_LV = [[1, 9, 1, 9], [10, 40, 1, 9], [10, 99, 2, 9], [10, 50, 10, 40], [10, 99, 10, 99], [100, 500, 10, 99], [100, 999, 10, 99], [100, 999, 100, 999]];
-const MUL_LV = [[2, 5, 2, 5], [2, 9, 2, 5], [2, 9, 2, 9], [2, 12, 2, 12], [11, 19, 2, 9], [11, 30, 2, 9], [20, 99, 2, 9], [11, 25, 11, 19]];
+const MUL_LV = [[2, 9, 2, 5], [2, 9, 2, 9], [2, 12, 2, 9], [2, 12, 2, 12], [11, 19, 2, 9], [11, 30, 2, 9], [20, 99, 2, 9], [11, 25, 11, 19]];
 const MAX_LV = 8;
 const opLevel = (op) => Math.min(MAX_LV, Math.max(1, Math.floor(S.skill[op])));
 // Temps "cible" d'une réponse : sert au bonus de vitesse et à l'ajustement du niveau
@@ -101,11 +101,25 @@ function makeQuestion(op, lvl) {
   let a = rint(a1, a2), b = rint(b1, b2);
   if (rng() < 0.5 && (op === 'add' || op === 'mul')) [a, b] = [b, a];
   switch (op) {
-    case 'add': return { q: `${a} + ${b}`, a: a + b };
+    case 'add': return { q: `${a} + ${b}`, a: a + b, k: `+${Math.min(a, b)},${Math.max(a, b)}` };
     case 'sub': { const x = Math.max(a, b), y = Math.min(a, b); return { q: `${x + y} − ${y}`, a: x }; }
-    case 'mul': return { q: `${a} × ${b}`, a: a * b };
+    case 'mul': return { q: `${a} × ${b}`, a: a * b, k: `×${Math.min(a, b)},${Math.max(a, b)}` };
     case 'div': { const x = Math.max(a, b), y = Math.min(a, b); return { q: `${x * y} ÷ ${y}`, a: x }; }
   }
+}
+const qKey = (q) => q.k || q.q;
+// Évite les calculs vus récemment ; si le niveau en a trop peu, prend le plus ancien
+const RECENT = 25;
+function freshQuestion(gen) {
+  let best = null, bestAge = -1;
+  for (let i = 0; i < 30; i++) {
+    const q = gen();
+    const idx = G.recent.lastIndexOf(qKey(q));
+    if (idx < 0) return q;
+    const age = G.recent.length - idx;
+    if (age > bestAge) { best = q; bestAge = age; }
+  }
+  return best;
 }
 function enabledOps() {
   const ops = Object.keys(S.ops).filter((o) => S.ops[o]);
@@ -353,7 +367,7 @@ function startGame(mode, trick = null) {
     score: 0, combo: 0, maxCombo: 0, correct: 0, answered: 0, rts: [],
     qIndex: 0, q: null, typed: '', qStart: 0, locked: true,
     lives: 3, endAt: 0, qDeadline: 0, qDur: 0, startAt: 0,
-    retry: [], newBadges: [], lastQ: '', seen: new Set(),
+    retry: [], newBadges: [], recent: [], retried: new Set(), seen: new Set(),
     xpBefore: S.xp, running: false,
   };
   // Un seul essai par jour : l'essai compte dès le départ, même si on quitte en cours
@@ -403,19 +417,21 @@ function chooseQuestion() {
   if (G.mode === 'daily') {
     const op = pick(['add', 'sub', 'mul', 'div']);
     const lvl = 3 + Math.floor((G.qIndex / DAILY_Q) * 4); // monte de 3 à 6
-    return { ...makeQuestion(op, lvl), op, lvl };
+    return { ...freshQuestion(() => makeQuestion(op, lvl)), op, lvl };
   }
   // Erreur de cette partie, revient ~4 questions plus tard
   const r = G.retry.findIndex((x) => x.at <= G.qIndex);
   if (r >= 0) { const x = G.retry.splice(r, 1)[0]; return { ...x, revenge: true }; }
   // Erreurs des parties précédentes (répétition espacée)
-  const due = S.missed.filter((m) => m.due <= S.games && enabledOps().includes(m.op));
-  if (due.length && Math.random() < 0.2) { const m = pick(due); return { q: m.q, a: m.a, op: m.op, lvl: m.lvl, revenge: true, stored: true }; }
+  const due = S.missed.filter((m) => m.due <= S.games && enabledOps().includes(m.op) && !G.retried.has(m.q));
+  if (due.length && Math.random() < 0.2) {
+    const m = pick(due);
+    G.retried.add(m.q); // une seule fois par partie
+    return { q: m.q, a: m.a, op: m.op, lvl: m.lvl, revenge: true, stored: true };
+  }
   const op = pick(enabledOps());
   const lvl = opLevel(op);
-  let q, tries = 0;
-  do q = makeQuestion(op, lvl); while (q.q === G.lastQ && ++tries < 5);
-  return { ...q, op, lvl };
+  return { ...freshQuestion(() => makeQuestion(op, lvl)), op, lvl };
 }
 
 function nextQuestion() {
@@ -423,7 +439,8 @@ function nextQuestion() {
   if (G.mode === 'daily' && G.qIndex >= DAILY_Q) return endGame();
   if (G.mode === 'trick' && G.qIndex >= TRICK_Q) return endGame();
   G.q = chooseQuestion();
-  G.lastQ = G.q.q;
+  G.recent.push(qKey(G.q));
+  if (G.recent.length > RECENT) G.recent.shift();
   G.typed = '';
   G.locked = false;
   const qe = $('#question');
@@ -543,7 +560,7 @@ function answer(ok, timeout = false) {
     renderCombo();
     if (q.revenge) handleRevenge(q, false);
     else if (q.op) {
-      G.retry.push({ q: q.q, a: q.a, op: q.op, lvl: q.lvl, at: G.qIndex + 4 });
+      queueRetry(q);
       storeMissed(q);
     }
     const ae = $('#answer');
@@ -580,8 +597,14 @@ function handleRevenge(q, ok) {
     }
   } else {
     if (m) { m.box = 0; m.due = S.games + 1; } else storeMissed(q);
-    G.retry.push({ q: q.q, a: q.a, op: q.op, lvl: q.lvl, at: G.qIndex + 4 });
+    queueRetry(q);
   }
+}
+// Un calcul raté revient ~4 questions plus tard, mais une seule fois par partie
+function queueRetry(q) {
+  if (G.retried.has(q.q)) return;
+  G.retried.add(q.q);
+  G.retry.push({ q: q.q, a: q.a, op: q.op, lvl: q.lvl, at: G.qIndex + 4 });
 }
 
 // ---------- Effets ----------
