@@ -42,8 +42,18 @@ const DEFAULT_STATE = {
   missed: [],            // répétition espacée : {q, a, op, box, due}
   badges: [],
   stats: { correct: 0, answered: 0, rtSum: 0, rtCount: 0, bestCombo: 0, fastest: 0, revanches: 0 },
+  opCount: { add: 0, sub: 0, mul: 0, div: 0 }, // réponses par opération (calibrage rapide au début)
+  dailyBest: 0,
 };
 let S = load();
+// Barème v2 : les points dépendent fortement de la difficulté. Les anciens records ne sont plus comparables.
+if (S.scoring !== 2) {
+  S.best = { sprint: 0, survie: 0 };
+  S.dailyBest = S.daily.best || 0;
+  S.badges = S.badges.filter((b) => b !== 'sprint1500' && b !== 'sprint4000');
+  S.scoring = 2;
+  save();
+}
 function load() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE));
@@ -81,7 +91,10 @@ const MUL_LV = [[2, 5, 2, 5], [2, 9, 2, 5], [2, 9, 2, 9], [2, 12, 2, 12], [11, 1
 const MAX_LV = 8;
 const opLevel = (op) => Math.min(MAX_LV, Math.max(1, Math.floor(S.skill[op])));
 // Temps "cible" d'une réponse : sert au bonus de vitesse et à l'ajustement du niveau
-const targetTime = (op, lvl) => 1.6 + 0.45 * lvl + (op === 'mul' || op === 'div' ? 0.4 : 0);
+const targetTime = (op, lvl) => 1.2 * Math.pow(1.3, lvl - 1) + 0.25 + (op === 'mul' || op === 'div' ? 0.4 : 0);
+// Points d'un calcul : doublent à chaque niveau, pour qu'un calcul plus dur rapporte toujours plus
+// que plusieurs calculs faciles faits dans le même temps.
+const basePoints = (lvl) => 10 * Math.pow(2, lvl - 1);
 
 function makeQuestion(op, lvl) {
   const [a1, a2, b1, b2] = (op === 'add' || op === 'sub' ? ADD_LV : MUL_LV)[lvl - 1];
@@ -98,12 +111,13 @@ function enabledOps() {
   const ops = Object.keys(S.ops).filter((o) => S.ops[o]);
   return ops.length ? ops : ['add'];
 }
-// Ajuste le niveau pour viser ~80 % de réussite (zone de "flow")
+// Ajuste le niveau pour viser ~90 % de réussite (zone de "flow")
 function adapt(op, ok, rt, lvl) {
   if (!op) return;
-  if (!ok) S.skill[op] -= 0.6;
-  else if (rt < targetTime(op, lvl)) S.skill[op] += 0.15;
-  else S.skill[op] += 0.03;
+  const k = S.opCount[op]++ < 25 ? 2.5 : 1; // au début, on monte vite jusqu'au bon niveau
+  if (!ok) S.skill[op] -= 1;
+  else if (rt < targetTime(op, lvl)) S.skill[op] += 0.15 * k;
+  else S.skill[op] += 0.03 * k;
   S.skill[op] = Math.min(MAX_LV + 0.99, Math.max(1, S.skill[op]));
 }
 
@@ -163,8 +177,8 @@ const BADGES = [
   { id: 'combo10', ico: '🔥', name: 'En feu', desc: 'Combo de 10' },
   { id: 'combo25', ico: '☄️', name: 'Inarrêtable', desc: 'Combo de 25' },
   { id: 'flash', ico: '⚡', name: 'Éclair', desc: 'Répondre en moins de 0,8 s' },
-  { id: 'sprint1500', ico: '🏃', name: 'Rapide', desc: '1 500 pts en Sprint' },
-  { id: 'sprint4000', ico: '🚀', name: 'Supersonique', desc: '4 000 pts en Sprint' },
+  { id: 'sprint1500', ico: '🏃', name: 'Rapide', desc: '2 500 pts en Sprint' },
+  { id: 'sprint4000', ico: '🚀', name: 'Supersonique', desc: '8 000 pts en Sprint' },
   { id: 'survie20', ico: '🛡️', name: 'Increvable', desc: '20 justes en Survie' },
   { id: 'perfect', ico: '💎', name: 'Sans faute', desc: 'Défi du jour à 20/20' },
   { id: 'trick1', ico: '🧠', name: 'Première astuce', desc: '3 étoiles sur une astuce' },
@@ -226,8 +240,15 @@ document.addEventListener('click', (e) => {
   const go = e.target.closest('[data-go]');
   if (go) { audio(); show(go.dataset.go); return; }
   const mode = e.target.closest('[data-mode]');
+  if (mode && mode.dataset.mode === 'daily' && dailyDone()) {
+    const left = new Date().setHours(24, 0, 0, 0) - Date.now();
+    toast(`Défi déjà fait : ${S.daily.best} pts. Le prochain dans ${Math.floor(left / 3600000)} h ${Math.floor(left / 60000) % 60} min ⏳`);
+    return;
+  }
   if (mode) { audio(); startGame(mode.dataset.mode); }
 });
+
+const dailyDone = () => S.daily.day === dayKey();
 
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
@@ -253,7 +274,7 @@ function renderHome() {
   se.classList.toggle('off', S.streak.last !== dayKey());
   $('#best-sprint').textContent = S.best.sprint ? `🏆 ${S.best.sprint}` : '';
   $('#best-survie').textContent = S.best.survie ? `🏆 ${S.best.survie}` : '';
-  $('#best-daily').textContent = S.daily.day === dayKey() ? `✓ ${S.daily.best}` : 'NOUVEAU';
+  $('#best-daily').textContent = dailyDone() ? `✓ ${S.daily.best}` : 'NOUVEAU';
   const stars = TRICKS.reduce((n, t) => n + (S.tricks[t.id] || 0), 0);
   $('#best-tricks').textContent = `⭐ ${stars}/${TRICKS.length * 3}`;
 }
@@ -291,7 +312,7 @@ function renderStats() {
   const rows = [
     ['Parties jouées', S.games], ['Calculs justes', st.correct], ['Précision', acc + ' %'],
     ['Réaction moyenne', rt], ['Plus rapide', st.fastest ? st.fastest.toFixed(2) + ' s' : '–'],
-    ['Meilleur combo', st.bestCombo], ['Record Sprint', S.best.sprint], ['Record Survie', S.best.survie],
+    ['Meilleur combo', st.bestCombo], ['Record Sprint', S.best.sprint], ['Record Survie', S.best.survie], ['Record Défi du jour', S.dailyBest],
     ['Série actuelle', currentStreak() + ' j'], ['Revanches réussies', st.revanches], ['Calculs à revoir', S.missed.length],
   ];
   $('#stats-body').innerHTML = `<div class="card">${rows.map(([k, v]) => `<div class="stat-row"><span>${k}</span><b>${v}</b></div>`).join('')}</div>`;
@@ -320,7 +341,7 @@ $('#reset').addEventListener('click', () => {
    ========================================================= */
 const SPRINT_MS = 60000;
 const DAILY_Q = 20;
-const COMBO_TIERS = [[20, 4], [10, 3], [5, 2], [0, 1]];
+const COMBO_TIERS = [[10, 2], [5, 1.5], [0, 1]];
 const multFor = (combo) => COMBO_TIERS.find(([c]) => combo >= c)[1];
 
 let G = null;
@@ -335,6 +356,8 @@ function startGame(mode, trick = null) {
     retry: [], newBadges: [], lastQ: '', seen: new Set(),
     xpBefore: S.xp, running: false,
   };
+  // Un seul essai par jour : l'essai compte dès le départ, même si on quitte en cours
+  if (mode === 'daily') { S.daily = { day: dayKey(), best: 0 }; save(); }
   $('#score').textContent = '0';
   $('#combo').textContent = ''; $('#combo').className = 'combo';
   $('#stage').classList.remove('fire');
@@ -420,7 +443,7 @@ function nextQuestion() {
 
 function updateHudInfo() {
   const h = $('#hud-info');
-  if (G.mode === 'survie') h.innerHTML = `<span class="lives">${'❤️'.repeat(G.lives)}${'🖤'.repeat(3 - G.lives)}</span>`;
+  if (G.mode === 'survie') h.innerHTML = `<span class="lives">${'❤️'.repeat(G.lives)}${'🖤'.repeat(3 - G.lives)}</span> · niv. ${G.q ? G.q.lvl : ''}`;
   else if (G.mode === 'daily') h.textContent = `Défi du jour · ${Math.min(G.qIndex + 1, DAILY_Q)}/${DAILY_Q}`;
   else if (G.mode === 'trick') h.textContent = `${G.trick.name} · ${Math.min(G.qIndex + 1, TRICK_Q)}/${TRICK_Q}`;
 }
@@ -434,7 +457,7 @@ function loop(now) {
     fill.style.transform = `scaleX(${Math.max(0, left / SPRINT_MS)})`;
     fill.classList.toggle('warn', left < 10000);
     const sec = Math.ceil(left / 1000);
-    $('#hud-info').textContent = `⏱ ${Math.max(0, sec)} s`;
+    $('#hud-info').textContent = `⏱ ${Math.max(0, sec)} s · niv. ${G.q ? G.q.lvl : ''}`;
     if (sec <= 5 && sec > 0 && sec !== lastTickSec) { lastTickSec = sec; SFX.tick(); }
     if (left <= 0) return endGame();
   } else if (G.mode === 'survie') {
@@ -499,9 +522,9 @@ function answer(ok, timeout = false) {
     G.maxCombo = Math.max(G.maxCombo, G.combo);
     const mult = multFor(G.combo);
     const tgt = targetTime(q.op || 'mul', q.lvl);
-    const base = 10 + 5 * q.lvl;
-    const bonus = rt < tgt ? Math.round(base * (1 - rt / tgt)) : 0;
-    const pts = (base + bonus) * mult;
+    const base = basePoints(q.lvl);
+    const bonus = rt < tgt ? base * 0.5 * (1 - rt / tgt) : 0; // jusqu'à +50 % si très rapide
+    const pts = Math.round((base + bonus) * mult);
     G.score += pts;
     if (q.revenge) handleRevenge(q, true);
 
@@ -565,9 +588,9 @@ function handleRevenge(q, ok) {
 function renderCombo() {
   const c = $('#combo');
   const m = multFor(G.combo);
-  c.className = 'combo' + (m > 1 ? ` x${m}` : '');
-  c.textContent = G.combo >= 3 ? `${m >= 3 ? '🔥 ' : ''}COMBO ${G.combo}${m > 1 ? ` · ×${m}` : ''}` : '';
-  $('#stage').classList.toggle('fire', m >= 3);
+  c.className = 'combo' + (m >= 2 ? ' x4' : m > 1 ? ' x2' : '');
+  c.textContent = G.combo >= 3 ? `${m >= 2 ? '🔥 ' : ''}COMBO ${G.combo}${m > 1 ? ` · ×${String(m).replace('.', ',')}` : ''}` : '';
+  $('#stage').classList.toggle('fire', m >= 2);
 }
 function bumpScore() {
   const s = $('#score'); s.textContent = G.score;
@@ -641,12 +664,12 @@ function endGame() {
 
   if (mode === 'sprint' || mode === 'survie') {
     if (G.score > S.best[mode]) { record = S.best[mode] > 0; S.best[mode] = G.score; }
-    if (mode === 'sprint' && G.score >= 1500) unlock('sprint1500');
-    if (mode === 'sprint' && G.score >= 4000) unlock('sprint4000');
+    if (mode === 'sprint' && G.score >= 2500) unlock('sprint1500');
+    if (mode === 'sprint' && G.score >= 8000) unlock('sprint4000');
     if (mode === 'survie' && G.correct >= 20) unlock('survie20');
   } else if (mode === 'daily') {
-    if (S.daily.day !== dayKey()) S.daily = { day: dayKey(), best: 0 };
-    if (G.score > S.daily.best) { record = S.daily.best > 0; S.daily.best = G.score; }
+    S.daily = { day: dayKey(), best: G.score };
+    if (G.score > S.dailyBest) { record = S.dailyBest > 0; S.dailyBest = G.score; }
     if (G.correct === DAILY_Q) unlock('perfect');
   } else if (mode === 'trick') {
     stars = G.correct === TRICK_Q && avg < 5 ? 3 : G.correct >= 9 ? 2 : G.correct >= 6 ? 1 : 0;
@@ -672,7 +695,7 @@ function endGame() {
   if (S.stats.correct >= 100) unlock('total100');
   if (S.stats.correct >= 1000) unlock('total1000');
 
-  const xpGain = mode === 'trick' ? 20 + G.correct * 5 + stars * 10 : 10 + Math.round(G.score / 10);
+  const xpGain = mode === 'trick' ? 20 + G.correct * 5 + stars * 10 : 10 + Math.round(G.score / 25);
   const before = levelInfo(S.xp);
   S.xp += xpGain;
   const after = levelInfo(S.xp);
@@ -700,6 +723,7 @@ function endGame() {
   $('#res-tip').textContent = acc < 70 && G.answered >= 5 ? 'Conseil : ralentis un poil. La précision d\'abord, la vitesse suit toute seule.' : pick(TIPS);
 
   const replay = { mode, trick: G.trick };
+  $('#res-again').style.display = mode === 'daily' ? 'none' : '';
   $('#res-again').onclick = () => startGame(replay.mode, replay.trick);
   $('#res-home').onclick = () => show(mode === 'trick' ? 'tricks' : 'home');
   show('results');

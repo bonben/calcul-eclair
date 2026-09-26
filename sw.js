@@ -1,5 +1,5 @@
 // Cache de l'appli pour qu'elle marche hors-ligne. Changer VERSION à chaque mise à jour.
-const VERSION = 'eclair-v2';
+const VERSION = 'eclair-v3';
 const FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
