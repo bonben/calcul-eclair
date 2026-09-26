@@ -720,6 +720,22 @@ function countUp(el, target) {
    Démarrage
    ========================================================= */
 renderHome();
+
+// iPhone : pas d'installation automatique, on explique comment faire (bouton Partager)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+let hintClosed = false;
+try { hintClosed = localStorage.getItem('install-hint-closed') === '1'; } catch (e) { /* ignore */ }
+if (isIOS && !standalone && !hintClosed) $('#install-hint').classList.add('show');
+$('#install-close').addEventListener('click', () => {
+  $('#install-hint').classList.remove('show');
+  try { localStorage.setItem('install-hint-closed', '1'); } catch (e) { /* ignore */ }
+});
+// Les iPhone ne savent pas vibrer depuis une page web
+if (!navigator.vibrate) $('#vibrate-row').style.display = 'none';
+// iOS peut remettre le son en pause : on le réveille à chaque toucher
+document.addEventListener('touchend', () => { if (AC && AC.state !== 'running') audio(); }, { passive: true });
+
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }

@@ -3,11 +3,18 @@
 Appli de calcul mental gamifiée : chrono, temps de réaction, combos, points, niveaux et badges.
 C'est une appli web installable (PWA) : elle s'installe depuis Chrome et marche ensuite sans internet.
 
+## Installer sur iPhone
+
+1. Ouvrir le lien dans **Chrome** ou **Safari**.
+2. Toucher le bouton **Partager** (carré avec une flèche vers le haut). Dans Chrome, il est à droite de la barre d'adresse ; dans Safari, en bas de l'écran.
+3. Faire défiler et choisir **« Sur l'écran d'accueil »**, puis **Ajouter**.
+
+Sur iPhone, les sons se coupent si le bouton silencieux est activé, et les vibrations ne sont pas disponibles.
+
 ## Installer sur Android
 
-1. Ouvrir le lien de l'appli dans **Chrome**.
-2. Menu **⋮** (en haut à droite), puis **Ajouter à l'écran d'accueil** (ou **Installer l'application**).
-3. L'icône ⚡ apparaît sur l'écran d'accueil. L'appli s'ouvre en plein écran, comme une vraie appli.
+1. Ouvrir le lien dans **Chrome**.
+2. Menu **⋮**, puis **Ajouter à l'écran d'accueil** (ou **Installer l'application**).
 
 La progression est enregistrée sur le téléphone.
 

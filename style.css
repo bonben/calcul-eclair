@@ -79,6 +79,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .bottom-nav { display: flex; gap: 8px; margin-top: auto; }
 .bottom-nav button { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 4px; font-weight: 700; font-size: 14px; }
 
+.install-hint { display: none; position: relative; background: rgba(0,229,255,.12); border: 1px solid var(--cyan); border-radius: 14px; padding: 10px 34px 10px 12px; font-size: 14px; line-height: 1.4; }
+.install-hint.show { display: block; }
+.install-hint .share-ico { display: inline-block; border: 1.5px solid currentColor; border-radius: 4px; padding: 0 4px; font-size: 12px; }
+.install-hint button { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; color: var(--muted); }
+
 /* ---------- Écrans génériques ---------- */
 .topbar { display: flex; align-items: center; gap: 10px; }
 .topbar h2 { margin: 0; font-size: 22px; font-weight: 900; }

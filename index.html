@@ -8,7 +8,11 @@
   <meta name="theme-color" content="#0d0b1e">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Calcul Éclair">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,6 +31,11 @@
         <div class="xpbar"><div class="xpfill" id="p-xpfill"></div></div>
         <div class="xptext" id="p-xptext">0 / 300 XP</div>
       </header>
+
+      <div class="install-hint" id="install-hint">
+        📲 <b>Installe l'appli :</b> touche <b>Partager</b> <span class="share-ico">⬆︎</span> puis <b>« Sur l'écran d'accueil »</b>.
+        <button id="install-close" aria-label="Fermer">✕</button>
+      </div>
 
       <h1 class="logo">CALCUL<br><span>ÉCLAIR</span> ⚡</h1>
 
@@ -157,7 +166,7 @@
         <div class="card">
           <h3>Ambiance</h3>
           <label class="toggle"><input type="checkbox" id="set-sound"> Sons</label>
-          <label class="toggle"><input type="checkbox" id="set-vibrate"> Vibrations</label>
+          <label class="toggle" id="vibrate-row"><input type="checkbox" id="set-vibrate"> Vibrations</label>
         </div>
         <div class="card">
           <h3>Niveau par opération</h3>
