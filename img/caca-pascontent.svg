@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a6a3a"/><stop offset="1" stop-color="#5a3c16"/></linearGradient>
+  </defs>
+  <g stroke="#3d2610" stroke-width="5" fill="url(#g)">
+    <path d="M100 18c10 10 26 22 20 36H76c-4-14 12-20 24-36z"/>
+    <rect x="56" y="48" width="88" height="46" rx="23"/>
+    <rect x="36" y="86" width="128" height="54" rx="27"/>
+    <rect x="16" y="130" width="168" height="60" rx="30"/>
+  </g>
+  <g fill="#fff" opacity=".15"><ellipse cx="80" cy="62" rx="12" ry="6"/><ellipse cx="60" cy="100" rx="14" ry="6"/></g>
+  <!-- sourcils tristes -->
+  <g stroke="#2a1606" stroke-width="6" stroke-linecap="round" fill="none"><path d="M58 102l30 -10"/><path d="M142 102l-30 -10"/></g>
+  <!-- yeux tombants -->
+  <g fill="#fff" stroke="#3d2610" stroke-width="4"><ellipse cx="78" cy="118" rx="15" ry="14"/><ellipse cx="122" cy="118" rx="15" ry="14"/></g>
+  <g fill="#2a1606"><circle cx="78" cy="123" r="7"/><circle cx="122" cy="123" r="7"/></g>
+  <!-- bouche à l'envers -->
+  <path d="M70 168c12-20 48-20 60 0" fill="none" stroke="#2a1606" stroke-width="7" stroke-linecap="round"/>
+  <!-- larme -->
+  <path d="M136 132c-6 10-8 16-8 20a8 8 0 0 0 16 0c0-4-2-10-8-20z" fill="#5ec8ff" stroke="#2d8fd0" stroke-width="2"/>
+  <!-- mouches -->
+  <g fill="#222"><ellipse cx="28" cy="40" rx="6" ry="4"/><ellipse cx="170" cy="28" rx="6" ry="4"/></g>
+  <g fill="#cfe9ff" opacity=".8"><ellipse cx="24" cy="34" rx="5" ry="3"/><ellipse cx="32" cy="34" rx="5" ry="3"/><ellipse cx="166" cy="22" rx="5" ry="3"/><ellipse cx="174" cy="22" rx="5" ry="3"/></g>
+  <g stroke="#3d2610" stroke-width="2" fill="none" stroke-dasharray="3 4"><path d="M34 44c10 8 12 20 26 18"/><path d="M162 32c-10 4-8 16-22 16"/></g>
+</svg>

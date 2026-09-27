@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="caca-bg" aria-hidden="true"></div>
   <div id="app">
 
     <!-- ===== ACCUEIL ===== -->
@@ -37,26 +38,26 @@
         <button id="install-close" aria-label="Fermer">✕</button>
       </div>
 
-      <h1 class="logo">CALCUL<br><span>ÉCLAIR</span> ⚡</h1>
+      <h1 class="logo" id="logo">CALCUL<br><span>ÉCLAIR</span> ⚡</h1>
 
       <div class="modes">
         <button class="mode mode-sprint" data-mode="sprint">
-          <span class="mode-ico">⏱️</span>
+          <span class="mode-ico" data-caca="💩">⏱️</span>
           <span class="mode-txt"><b>Sprint 60 s</b><small>Un max de calculs en 1 minute</small></span>
           <span class="mode-best" id="best-sprint"></span>
         </button>
         <button class="mode mode-survie" data-mode="survie">
-          <span class="mode-ico">💀</span>
+          <span class="mode-ico" data-caca="🚽">💀</span>
           <span class="mode-txt"><b>Survie</b><small>3 vies, ça accélère…</small></span>
           <span class="mode-best" id="best-survie"></span>
         </button>
         <button class="mode mode-daily" data-mode="daily">
-          <span class="mode-ico">📅</span>
+          <span class="mode-ico" data-caca="🧻">📅</span>
           <span class="mode-txt"><b>Défi du jour</b><small>20 calculs, un seul essai par jour</small></span>
           <span class="mode-best" id="best-daily"></span>
         </button>
         <button class="mode mode-tricks" data-go="tricks">
-          <span class="mode-ico">🧠</span>
+          <span class="mode-ico" data-caca="🪠">🧠</span>
           <span class="mode-txt"><b>Astuces de pro</b><small>Apprends les techniques qui tuent</small></span>
           <span class="mode-best" id="best-tricks"></span>
         </button>
@@ -167,6 +168,7 @@
         <div class="card">
           <h3>Ambiance</h3>
           <label class="toggle"><input type="checkbox" id="set-sound"> Sons</label>
+          <label class="toggle"><input type="checkbox" id="set-caca"> Thème Cacalcul 💩</label>
           <label class="toggle"><input type="checkbox" id="set-photos"> Photos réactions 😁</label>
           <label class="toggle" id="vibrate-row"><input type="checkbox" id="set-vibrate"> Vibrations</label>
         </div>

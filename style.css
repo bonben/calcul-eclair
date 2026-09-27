@@ -221,5 +221,28 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .op-lvl .bar { flex: 1; height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; }
 .op-lvl .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink)); }
 
+/* ---------- Thème Cacalcul 💩 ---------- */
+body.caca {
+  --bg: #1c120a; --bg2: #2a1b0e; --card: #34230f; --line: #50361a;
+  --text: #fff3e0; --muted: #c9a57a;
+  --pink: #c8742c; --cyan: #e8b04a; --green: #a8d04a; --purple: #8b5a2b; --orange: #d98b3a;
+  background: radial-gradient(120% 80% at 50% 0%, #4a2f14 0%, var(--bg) 60%) fixed, var(--bg);
+}
+#caca-bg { display: none; position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+body.caca #caca-bg { display: block; }
+#caca-bg span { position: absolute; opacity: .13; animation: drift var(--t) ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); } }
+#app { z-index: 1; }
+.caca .logo span { background: linear-gradient(90deg, #ffd23f, #c8742c, #8b5a2b); -webkit-background-clip: text; background-clip: text; }
+.caca .mode-sprint { background: linear-gradient(135deg, #7a4a1e, #c8742c); }
+.caca .mode-survie { background: linear-gradient(135deg, #4a2f14, #8b5a2b); }
+.caca .mode-daily  { background: linear-gradient(135deg, #a8d04a, #e8b04a); color: #2a1b0e; }
+.caca .mode-tricks { background: linear-gradient(135deg, #ffd23f, #d98b3a); color: #2a1300; }
+.caca .lvl-badge { background: linear-gradient(90deg, #8b5a2b, #c8742c); }
+.caca .btn-big { background: linear-gradient(90deg, #8b5a2b, #c8742c); box-shadow: 0 6px 0 #3d2610; }
+.caca .xpfill { background: linear-gradient(90deg, #e8b04a, #a8d04a); }
+.caca .res-score { background: linear-gradient(90deg, #ffd23f, #c8742c); -webkit-background-clip: text; background-clip: text; }
+.spark.poop { width: auto; height: auto; background: none; font-size: 22px; }
+
 .toast { position: absolute; left: 16px; right: 16px; bottom: calc(24px + var(--safe-bot)); background: var(--yellow); color: #231400; font-weight: 900; padding: 12px 14px; border-radius: 14px; text-align: center; transform: translateY(calc(100% + 80px)); transition: transform .3s; z-index: 10; }
 .toast.show { transform: none; }

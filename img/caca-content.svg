@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a0672f"/><stop offset="1" stop-color="#6e4118"/></linearGradient>
+  </defs>
+  <g stroke="#4a2a0e" stroke-width="5" fill="url(#g)">
+    <path d="M100 8c14 14 36 26 26 46H74c-4-18 16-24 26-46z"/>
+    <rect x="56" y="48" width="88" height="46" rx="23"/>
+    <rect x="36" y="86" width="128" height="54" rx="27"/>
+    <rect x="16" y="130" width="168" height="60" rx="30"/>
+  </g>
+  <g fill="#fff" opacity=".22"><ellipse cx="80" cy="62" rx="12" ry="6"/><ellipse cx="60" cy="100" rx="14" ry="6"/><ellipse cx="42" cy="146" rx="14" ry="6"/></g>
+  <!-- yeux rieurs -->
+  <g fill="#fff" stroke="#4a2a0e" stroke-width="4"><ellipse cx="76" cy="112" rx="18" ry="20"/><ellipse cx="124" cy="112" rx="18" ry="20"/></g>
+  <g fill="#2a1606"><circle cx="79" cy="115" r="9"/><circle cx="121" cy="115" r="9"/></g>
+  <g fill="#fff"><circle cx="82" cy="111" r="3"/><circle cx="124" cy="111" r="3"/></g>
+  <!-- grand sourire -->
+  <path d="M58 146c10 34 74 34 84 0z" fill="#3a1d08" stroke="#4a2a0e" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M64 148h72c-1 5-2 8-4 10H68c-2-2-3-5-4-10z" fill="#fff"/>
+  <path d="M82 170c8 6 28 6 36 0-6-8-30-8-36 0z" fill="#ff6b8a"/>
+  <!-- joues -->
+  <g fill="#ff8a8a" opacity=".45"><ellipse cx="46" cy="136" rx="10" ry="6"/><ellipse cx="154" cy="136" rx="10" ry="6"/></g>
+</svg>

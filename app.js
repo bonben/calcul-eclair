@@ -36,6 +36,7 @@ const DEFAULT_STATE = {
   sound: true,
   vibrate: true,
   photos: true,
+  caca: false,
   best: { sprint: 0, survie: 0 },
   daily: { day: '', best: 0 },
   tricks: {},            // id -> étoiles (0..3)
@@ -80,7 +81,9 @@ function levelInfo(xp) {
 }
 const TITLES = [[1, 'Recrue'], [3, 'Challenger'], [5, 'Ninja du calcul'], [8, 'Cerveau turbo'], [12, 'Machine à calculer'],
   [16, 'Sniper des chiffres'], [20, 'Boss final'], [25, 'Légende'], [30, 'Divinité des nombres']];
-const titleFor = (lvl) => TITLES.filter(([l]) => lvl >= l).pop()[1];
+const CACA_TITLES = [[1, 'Petit pet'], [3, 'Crotte'], [5, 'Bouse'], [8, 'Caca nerveux'], [12, 'Chasse d\'eau'],
+  [16, 'Tsunami de caca'], [20, 'Boss des toilettes'], [25, 'Légende du trône'], [30, 'Divinité du caca']];
+const titleFor = (lvl) => (S.caca ? CACA_TITLES : TITLES).filter(([l]) => lvl >= l).pop()[1];
 
 /* =========================================================
    Génération des calculs (difficulté adaptative)
@@ -231,25 +234,48 @@ function tone(freq, dur, type = 'sine', vol = 0.18, delay = 0, slideTo = null) {
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
   o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + 0.02);
 }
+// Sons du thème Cacalcul
+function plop(combo) {
+  const f = 700 * Math.pow(2, Math.min(combo, 24) / 36);
+  tone(f, 0.1, 'sine', 0.3, 0, f / 4);
+}
+function prout(len = 0.5) {
+  const ac = audio(); if (!ac) return;
+  const t = ac.currentTime;
+  const o = ac.createOscillator(), lfo = ac.createOscillator(), lfoGain = ac.createGain();
+  const filt = ac.createBiquadFilter(), g = ac.createGain();
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(95, t); o.frequency.linearRampToValueAtTime(70, t + len);
+  lfo.frequency.setValueAtTime(22, t); lfo.frequency.linearRampToValueAtTime(12, t + len); lfoGain.gain.value = 35;
+  lfo.connect(lfoGain).connect(o.frequency);
+  filt.type = 'lowpass'; filt.frequency.value = 500; filt.Q.value = 6;
+  g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.03);
+  g.gain.setValueAtTime(0.3, t + len * 0.7); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  o.connect(filt).connect(g).connect(ac.destination);
+  o.start(t); lfo.start(t); o.stop(t + len + 0.05); lfo.stop(t + len + 0.05);
+}
 const SFX = {
-  ok: (combo) => { const f = 520 * Math.pow(2, Math.min(combo, 24) / 24); tone(f, 0.09, 'triangle', 0.2); tone(f * 1.5, 0.12, 'triangle', 0.12, 0.05); },
-  bad: () => tone(180, 0.28, 'sawtooth', 0.14, 0, 80),
+  ok: (combo) => { if (S.caca) return plop(combo); const f = 520 * Math.pow(2, Math.min(combo, 24) / 24); tone(f, 0.09, 'triangle', 0.2); tone(f * 1.5, 0.12, 'triangle', 0.12, 0.05); },
+  bad: () => (S.caca ? prout() : tone(180, 0.28, 'sawtooth', 0.14, 0, 80)),
   tier: () => [0, 4, 7, 12].forEach((s, i) => tone(660 * Math.pow(2, s / 12), 0.12, 'square', 0.08, i * 0.06)),
   tick: () => tone(1000, 0.03, 'square', 0.05),
   count: () => tone(440, 0.12, 'square', 0.1),
   go: () => tone(880, 0.25, 'square', 0.12),
   end: () => [0, 4, 7, 12, 16].forEach((s, i) => tone(523 * Math.pow(2, s / 12), 0.18, 'triangle', 0.15, i * 0.09)),
-  life: () => { tone(300, 0.15, 'square', 0.12); tone(200, 0.3, 'square', 0.12, 0.12); },
+  life: () => { if (S.caca) return prout(0.7); tone(300, 0.15, 'square', 0.12); tone(200, 0.3, 'square', 0.12, 0.12); },
 };
 // ---------- Photos réactions ----------
 const PHOTO = { ok: new Image(), bad: new Image() };
 PHOTO.ok.src = 'img/content.webp';
 PHOTO.bad.src = 'img/pascontent.webp';
+const CACA = { ok: new Image(), bad: new Image() };
+CACA.ok.src = 'img/caca-content.svg';
+CACA.bad.src = 'img/caca-pascontent.svg';
 function reaction(ok) {
   if (!S.photos) return;
   const el = $('#reaction');
   const side = Math.random() < 0.5 ? 'left' : 'right';
-  el.src = (ok ? PHOTO.ok : PHOTO.bad).src;
+  const set = S.caca ? CACA : PHOTO;
+  el.src = (ok ? set.ok : set.bad).src;
   el.className = 'reaction';
   void el.offsetWidth; // relance l'animation même si la précédente n'est pas finie
   el.style.setProperty('--rot', side === 'left' ? '-7deg' : '7deg');
@@ -353,6 +379,7 @@ function renderSettings() {
   $('#set-sound').checked = S.sound;
   $('#set-vibrate').checked = S.vibrate;
   $('#set-photos').checked = S.photos;
+  $('#set-caca').checked = S.caca;
   $('#op-levels').innerHTML = Object.keys(OP_SYM).map((op) => `
     <div class="op-lvl"><span style="width:24px">${OP_SYM[op]}</span><span class="bar"><i style="width:${(opLevel(op) / MAX_LV) * 100}%"></i></span><span>${opLevel(op)}/${MAX_LV}</span></div>`).join('');
 }
@@ -363,6 +390,10 @@ $$('[data-op]').forEach((c) => c.addEventListener('change', () => {
 }));
 $('#set-sound').addEventListener('change', (e) => { S.sound = e.target.checked; save(); });
 $('#set-photos').addEventListener('change', (e) => { S.photos = e.target.checked; save(); });
+$('#set-caca').addEventListener('change', (e) => {
+  S.caca = e.target.checked; save(); applyTheme();
+  if (S.caca) { prout(); toast('💩 Bienvenue dans Cacalcul !'); }
+});
 $('#set-vibrate').addEventListener('change', (e) => { S.vibrate = e.target.checked; save(); if (S.vibrate) buzz(50); });
 $('#reset').addEventListener('click', () => {
   if (confirm('Effacer toute la progression (XP, records, badges) ?')) { S = structuredClone(DEFAULT_STATE); save(); show('home'); toast('Remis à zéro'); }
@@ -567,8 +598,8 @@ function answer(ok, timeout = false) {
     $('#answer').classList.add('ok');
     const fb = $('#feedback');
     fb.className = 'feedback' + (rt < 1.2 ? ' fast' : '');
-    fb.textContent = rt < 1 ? `⚡ ${rt.toFixed(2)} s — ÉCLAIR !` : rt < 2 ? `${rt.toFixed(2)} s — rapide !` : `${rt.toFixed(2)} s`;
-    floatText(`+${pts}`);
+    fb.textContent = rt < 1 ? (S.caca ? `💩 ${rt.toFixed(2)} s — CACA ÉCLAIR !` : `⚡ ${rt.toFixed(2)} s — ÉCLAIR !`) : rt < 2 ? `${rt.toFixed(2)} s — rapide !` : `${rt.toFixed(2)} s`;
+    floatText(`+${pts}${S.caca ? ' 💩' : ''}`);
     reaction(true);
     bumpScore();
     SFX.ok(G.combo);
@@ -633,7 +664,7 @@ function renderCombo() {
   const c = $('#combo');
   const m = multFor(G.combo);
   c.className = 'combo' + (m >= 2 ? ' x4' : m > 1 ? ' x2' : '');
-  c.textContent = G.combo >= 3 ? `${m >= 2 ? '🔥 ' : ''}COMBO ${G.combo}${m > 1 ? ` · ×${String(m).replace('.', ',')}` : ''}` : '';
+  c.textContent = G.combo >= 3 ? `${m >= 2 ? (S.caca ? '💩 ' : '🔥 ') : ''}COMBO ${G.combo}${m > 1 ? ` · ×${String(m).replace('.', ',')}` : ''}` : '';
   $('#stage').classList.toggle('fire', m >= 2);
 }
 function bumpScore() {
@@ -652,7 +683,8 @@ function sparks(n) {
   const colors = ['#ffd23f', '#ff3d81', '#00e5ff', '#3dffa2', '#a66bff'];
   for (let i = 0; i < n; i++) {
     const s = document.createElement('div');
-    s.className = 'spark';
+    s.className = S.caca ? 'spark poop' : 'spark';
+    if (S.caca) s.textContent = '💩';
     const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 90;
     s.style.left = '50%'; s.style.top = '55%';
     s.style.background = colors[i % colors.length];
@@ -751,7 +783,8 @@ function endGame() {
   const labels = { sprint: 'Sprint 60 s', survie: 'Survie', daily: 'Défi du jour', trick: G.trick && G.trick.name };
   $('#res-mode').textContent = labels[mode];
   $('#res-record').classList.toggle('show', record);
-  $('#res-record').textContent = mode === 'trick' ? '🎉 NOUVEAU RECORD D\'ÉTOILES !' : '🎉 NOUVEAU RECORD !';
+  const party = S.caca ? '💩' : '🎉';
+  $('#res-record').textContent = mode === 'trick' ? `${party} NOUVEAU RECORD D'ÉTOILES !` : `${party} NOUVEAU RECORD !`;
   $('#res-score').textContent = mode === 'trick' ? `${G.correct}/${TRICK_Q}` : '0';
   $('#res-stars').textContent = mode === 'trick' ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '';
   $('#res-correct').textContent = mode === 'daily' ? `${G.correct}/${DAILY_Q}` : G.correct;
@@ -787,7 +820,33 @@ function countUp(el, target) {
 /* =========================================================
    Démarrage
    ========================================================= */
-renderHome();
+// ---------- Thème ----------
+const LOGO_NORMAL = $('#logo').innerHTML;
+$$('.mode-ico').forEach((e) => { e.dataset.normal = e.textContent; });
+function applyTheme() {
+  document.body.classList.toggle('caca', S.caca);
+  document.title = S.caca ? 'Cacalcul' : 'Calcul Éclair';
+  $('meta[name=theme-color]').content = S.caca ? '#1c120a' : '#0d0b1e';
+  $('#logo').innerHTML = S.caca ? 'CACA<span>LCUL</span><br>💩' : LOGO_NORMAL;
+  $$('.mode-ico').forEach((e) => { e.textContent = S.caca ? e.dataset.caca : e.dataset.normal; });
+  const bg = $('#caca-bg');
+  if (S.caca && !bg.childElementCount) {
+    const emo = ['💩', '💩', '💩', '🧻', '🚽', '🪰'];
+    for (let i = 0; i < 16; i++) {
+      const s = document.createElement('span');
+      s.textContent = emo[i % emo.length];
+      s.style.left = `${Math.random() * 92}%`; s.style.top = `${Math.random() * 92}%`;
+      s.style.fontSize = `${24 + Math.random() * 30}px`;
+      s.style.setProperty('--t', `${8 + Math.random() * 10}s`);
+      s.style.setProperty('--dx', `${Math.random() * 60 - 30}px`);
+      s.style.setProperty('--dy', `${Math.random() * 60 - 30}px`);
+      s.style.setProperty('--r', `${Math.random() * 60 - 30}deg`);
+      bg.appendChild(s);
+    }
+  }
+  renderHome();
+}
+applyTheme();
 
 // iPhone : pas d'installation automatique, on explique comment faire (bouton Partager)
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -1,6 +1,6 @@
 // Cache de l'appli pour qu'elle marche hors-ligne. Changer VERSION à chaque mise à jour.
-const VERSION = 'eclair-v5';
-const FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'img/content.webp', 'img/pascontent.webp'];
+const VERSION = 'eclair-v6';
+const FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'img/content.webp', 'img/pascontent.webp', 'img/caca-content.svg', 'img/caca-pascontent.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
