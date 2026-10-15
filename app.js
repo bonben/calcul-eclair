@@ -56,6 +56,8 @@ if (S.scoring !== 2) {
   S.scoring = 2;
   save();
 }
+// Le badge Éclair exigeait autrefois un résultat à 2 chiffres : on le rend à qui a déjà le temps requis.
+if (S.stats.fastest && S.stats.fastest < 0.8 && !S.badges.includes('flash')) { S.badges.push('flash'); save(); }
 function load() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE));
@@ -272,11 +274,11 @@ CACA.ok.src = 'img/caca-content.svg';
 CACA.bad.src = 'img/caca-pascontent.svg';
 function reaction(ok) {
   if (!S.photos) return;
-  const el = $('#reaction');
+  // Une image fixe par réaction (cf. applyTheme) : changer le src d'une seule image
+  // laissait parfois voir l'ancienne, d'où un pouce en bas sur une bonne réponse.
+  $('#reaction-ok').className = $('#reaction-bad').className = 'reaction';
+  const el = $(ok ? '#reaction-ok' : '#reaction-bad');
   const side = Math.random() < 0.5 ? 'left' : 'right';
-  const set = S.caca ? CACA : PHOTO;
-  el.src = (ok ? set.ok : set.bad).src;
-  el.className = 'reaction';
   void el.offsetWidth; // relance l'animation même si la précédente n'est pas finie
   el.style.setProperty('--rot', side === 'left' ? '-7deg' : '7deg');
   el.style.setProperty('--dur', ok ? '600ms' : '850ms');
@@ -428,7 +430,7 @@ function startGame(mode, trick = null) {
   $('#feedback').innerHTML = '&nbsp;';
   $('#question').textContent = '';
   $('#qtag').classList.remove('show');
-  $('#reaction').className = 'reaction';
+  $('#reaction-ok').className = $('#reaction-bad').className = 'reaction';
   $('#timefill').style.transform = 'scaleX(1)';
   $('#timefill').classList.remove('warn');
   $('#hud-info').textContent = '';
@@ -583,7 +585,7 @@ function answer(ok, timeout = false) {
     G.rts.push(rt);
     S.stats.correct++; S.stats.rtSum += rt; S.stats.rtCount++;
     if (!S.stats.fastest || rt < S.stats.fastest) S.stats.fastest = rt;
-    if (rt < 0.8 && String(q.a).length >= 2) unlock('flash');
+    if (rt < 0.8) unlock('flash');
     const prevMult = multFor(G.combo);
     G.combo++;
     G.maxCombo = Math.max(G.maxCombo, G.combo);
@@ -828,6 +830,9 @@ function applyTheme() {
   document.title = S.caca ? 'Cacalcul' : 'Calcul Éclair';
   $('meta[name=theme-color]').content = S.caca ? '#1c120a' : '#0d0b1e';
   $('#logo').innerHTML = S.caca ? 'CACA<span>LCUL</span><br>💩' : LOGO_NORMAL;
+  const set = S.caca ? CACA : PHOTO;
+  $('#reaction-ok').src = set.ok.src;
+  $('#reaction-bad').src = set.bad.src;
   $$('.mode-ico').forEach((e) => { e.textContent = S.caca ? e.dataset.caca : e.dataset.normal; });
   const bg = $('#caca-bg');
   if (S.caca && !bg.childElementCount) {
