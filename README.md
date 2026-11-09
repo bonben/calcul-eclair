@@ -43,7 +43,7 @@ Calculus Magicus : bordeaux et or, baguette étincelante et chaudron raté en r�
 ## Développement
 
 Pas de build : des fichiers statiques (`index.html`, `style.css`, `app.js`, `sw.js`).
-Après une modification, changer `VERSION` dans `sw.js` pour que les téléphones récupèrent la mise à jour.
+Après une modification, changer `VERSION` dans `sw.js` **et** le `?v=` de `style.css` et `app.js` dans `index.html`, pour que les téléphones récupèrent la mise à jour sans mélanger ancienne et nouvelle version.
 
 ```bash
 python3 -m http.server 8765
