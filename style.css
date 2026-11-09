@@ -94,6 +94,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .muted { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
 .toggle { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-weight: 600; }
 .toggle input { width: 22px; height: 22px; accent-color: var(--pink); }
+.toggle select { margin-left: auto; font: inherit; font-weight: 700; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; }
 
 .btn-big { width: 100%; padding: 16px; border-radius: 16px; font-size: 20px; font-weight: 900;
   background: linear-gradient(90deg, var(--pink), var(--orange)); box-shadow: 0 6px 0 #8a1c46; }
@@ -228,9 +229,9 @@ body.caca {
   --pink: #c8742c; --cyan: #e8b04a; --green: #a8d04a; --purple: #8b5a2b; --orange: #d98b3a;
   background: radial-gradient(120% 80% at 50% 0%, #4a2f14 0%, var(--bg) 60%) fixed, var(--bg);
 }
-#caca-bg { display: none; position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-body.caca #caca-bg { display: block; }
-#caca-bg span { position: absolute; opacity: .13; animation: drift var(--t) ease-in-out infinite alternate; }
+#theme-bg { display: none; position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+body.caca #theme-bg, body.anneaux #theme-bg { display: block; }
+#theme-bg span { position: absolute; opacity: .13; animation: drift var(--t) ease-in-out infinite alternate; }
 @keyframes drift { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); } }
 #app { z-index: 1; }
 .caca .logo span { background: linear-gradient(90deg, #ffd23f, #c8742c, #8b5a2b); -webkit-background-clip: text; background-clip: text; }
@@ -242,7 +243,26 @@ body.caca #caca-bg { display: block; }
 .caca .btn-big { background: linear-gradient(90deg, #8b5a2b, #c8742c); box-shadow: 0 6px 0 #3d2610; }
 .caca .xpfill { background: linear-gradient(90deg, #e8b04a, #a8d04a); }
 .caca .res-score { background: linear-gradient(90deg, #ffd23f, #c8742c); -webkit-background-clip: text; background-clip: text; }
-.spark.poop { width: auto; height: auto; background: none; font-size: 22px; }
+.spark.emo { width: auto; height: auto; background: none; font-size: 22px; }
+
+/* ---------- Thème Le Calcul des Anneaux 💍 ---------- */
+body.anneaux {
+  --bg: #0e1510; --bg2: #16201a; --card: #1e2a21; --line: #36442f;
+  --text: #f5ecd2; --muted: #b9a982;
+  --pink: #c8962c; --cyan: #8fc7a0; --green: #7fb069; --purple: #5b6e3a; --orange: #d9822b; --yellow: #f2c94c;
+  background: radial-gradient(120% 80% at 50% 0%, #3a3216 0%, var(--bg) 60%) fixed, var(--bg);
+}
+.anneaux #theme-bg span { opacity: .1; }
+.anneaux .logo { font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-style: normal; font-size: 34px; letter-spacing: 3px; }
+.anneaux .logo span { background: linear-gradient(90deg, #a8781e, #f7dc7c, #c8962c, #f7dc7c, #a8781e); -webkit-background-clip: text; background-clip: text; }
+.anneaux .mode-sprint { background: linear-gradient(135deg, #2f5b33, #7fb069); }
+.anneaux .mode-survie { background: linear-gradient(135deg, #3a0f08, #b8401c); }
+.anneaux .mode-daily  { background: linear-gradient(135deg, #e8d7a8, #c8a564); color: #2b2210; }
+.anneaux .mode-tricks { background: linear-gradient(135deg, #5c6670, #c9d1d6); color: #1a1f24; }
+.anneaux .lvl-badge { background: linear-gradient(90deg, #a8781e, #e2b84a); color: #1f1806; }
+.anneaux .btn-big { background: linear-gradient(90deg, #a8781e, #e2b84a); color: #1f1806; box-shadow: 0 6px 0 #4a3510; }
+.anneaux .xpfill { background: linear-gradient(90deg, #7fb069, #f2c94c); }
+.anneaux .res-score { background: linear-gradient(90deg, #f7dc7c, #c8962c); -webkit-background-clip: text; background-clip: text; }
 
 .toast { position: absolute; left: 16px; right: 16px; bottom: calc(24px + var(--safe-bot)); background: var(--yellow); color: #231400; font-weight: 900; padding: 12px 14px; border-radius: 14px; text-align: center; transform: translateY(calc(100% + 80px)); transition: transform .3s; z-index: 10; }
 .toast.show { transform: none; }

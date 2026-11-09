@@ -36,7 +36,7 @@ const DEFAULT_STATE = {
   sound: true,
   vibrate: true,
   photos: true,
-  caca: false,
+  theme: 'eclair',       // eclair | caca | anneaux
   best: { sprint: 0, survie: 0 },
   daily: { day: '', best: 0 },
   tricks: {},            // id -> étoiles (0..3)
@@ -56,6 +56,8 @@ if (S.scoring !== 2) {
   S.scoring = 2;
   save();
 }
+// Ancien réglage : une simple case pour le thème Cacalcul
+if ('caca' in S) { if (S.caca) S.theme = 'caca'; delete S.caca; save(); }
 // Le badge Éclair exigeait autrefois un résultat à 2 chiffres : on le rend à qui a déjà le temps requis.
 if (S.stats.fastest && S.stats.fastest < 0.8 && !S.badges.includes('flash')) { S.badges.push('flash'); save(); }
 function load() {
@@ -85,7 +87,9 @@ const TITLES = [[1, 'Recrue'], [3, 'Challenger'], [5, 'Ninja du calcul'], [8, 'C
   [16, 'Sniper des chiffres'], [20, 'Boss final'], [25, 'Légende'], [30, 'Divinité des nombres']];
 const CACA_TITLES = [[1, 'Petit pet'], [3, 'Crotte'], [5, 'Bouse'], [8, 'Caca nerveux'], [12, 'Chasse d\'eau'],
   [16, 'Tsunami de caca'], [20, 'Boss des toilettes'], [25, 'Légende du trône'], [30, 'Divinité du caca']];
-const titleFor = (lvl) => (S.caca ? CACA_TITLES : TITLES).filter(([l]) => lvl >= l).pop()[1];
+const ANNEAUX_TITLES = [[1, 'Hobbit de la Comté'], [3, 'Compagnon de route'], [5, 'Rôdeur du Nord'], [8, 'Archer elfe'],
+  [12, 'Gardien du Gouffre'], [16, 'Cavalier du Rohan'], [20, 'Magicien gris'], [25, 'Magicien blanc'], [30, 'Seigneur des Nombres']];
+const titleFor = (lvl) => ({ caca: CACA_TITLES, anneaux: ANNEAUX_TITLES }[S.theme] || TITLES).filter(([l]) => lvl >= l).pop()[1];
 
 /* =========================================================
    Génération des calculs (difficulté adaptative)
@@ -255,15 +259,36 @@ function prout(len = 0.5) {
   o.connect(filt).connect(g).connect(ac.destination);
   o.start(t); lfo.start(t); o.stop(t + len + 0.05); lfo.stop(t + len + 0.05);
 }
+// Sons du thème des Anneaux : harpe elfique, cor et tambour de guerre
+function harpe(combo) {
+  const gamme = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+  const f = 392 * Math.pow(2, gamme[Math.min(combo, gamme.length - 1)] / 12);
+  tone(f, 0.5, 'triangle', 0.16); tone(f * 2, 0.35, 'sine', 0.06, 0.01); tone(f * 1.5, 0.45, 'triangle', 0.08, 0.07);
+}
+function cor(len = 0.6) {
+  const ac = audio(); if (!ac) return;
+  const t = ac.currentTime;
+  const filt = ac.createBiquadFilter(), g = ac.createGain();
+  filt.type = 'lowpass'; filt.frequency.setValueAtTime(400, t); filt.frequency.linearRampToValueAtTime(900, t + 0.15); filt.frequency.linearRampToValueAtTime(350, t + len);
+  g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.12);
+  g.gain.setValueAtTime(0.22, t + len * 0.7); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  [98, 98.6, 147].forEach((f) => {
+    const o = ac.createOscillator(); o.type = 'sawtooth';
+    o.frequency.setValueAtTime(f, t); o.frequency.linearRampToValueAtTime(f * 0.94, t + len);
+    o.connect(filt); o.start(t); o.stop(t + len + 0.05);
+  });
+  filt.connect(g).connect(ac.destination);
+}
+function tambour() { tone(110, 0.5, 'sine', 0.4, 0, 40); tone(90, 0.6, 'sine', 0.35, 0.28, 35); }
 const SFX = {
-  ok: (combo) => { if (S.caca) return plop(combo); const f = 520 * Math.pow(2, Math.min(combo, 24) / 24); tone(f, 0.09, 'triangle', 0.2); tone(f * 1.5, 0.12, 'triangle', 0.12, 0.05); },
-  bad: () => (S.caca ? prout() : tone(180, 0.28, 'sawtooth', 0.14, 0, 80)),
+  ok: (combo) => { if (S.theme === 'caca') return plop(combo); if (S.theme === 'anneaux') return harpe(combo); const f = 520 * Math.pow(2, Math.min(combo, 24) / 24); tone(f, 0.09, 'triangle', 0.2); tone(f * 1.5, 0.12, 'triangle', 0.12, 0.05); },
+  bad: () => (S.theme === 'caca' ? prout() : S.theme === 'anneaux' ? cor() : tone(180, 0.28, 'sawtooth', 0.14, 0, 80)),
   tier: () => [0, 4, 7, 12].forEach((s, i) => tone(660 * Math.pow(2, s / 12), 0.12, 'square', 0.08, i * 0.06)),
   tick: () => tone(1000, 0.03, 'square', 0.05),
   count: () => tone(440, 0.12, 'square', 0.1),
   go: () => tone(880, 0.25, 'square', 0.12),
   end: () => [0, 4, 7, 12, 16].forEach((s, i) => tone(523 * Math.pow(2, s / 12), 0.18, 'triangle', 0.15, i * 0.09)),
-  life: () => { if (S.caca) return prout(0.7); tone(300, 0.15, 'square', 0.12); tone(200, 0.3, 'square', 0.12, 0.12); },
+  life: () => { if (S.theme === 'caca') return prout(0.7); if (S.theme === 'anneaux') return tambour(); tone(300, 0.15, 'square', 0.12); tone(200, 0.3, 'square', 0.12, 0.12); },
 };
 // ---------- Photos réactions ----------
 const PHOTO = { ok: new Image(), bad: new Image() };
@@ -272,6 +297,9 @@ PHOTO.bad.src = 'img/pascontent.webp';
 const CACA = { ok: new Image(), bad: new Image() };
 CACA.ok.src = 'img/caca-content.svg';
 CACA.bad.src = 'img/caca-pascontent.svg';
+const ANNEAUX = { ok: new Image(), bad: new Image() };
+ANNEAUX.ok.src = 'img/anneau-content.svg';
+ANNEAUX.bad.src = 'img/anneau-pascontent.svg';
 function reaction(ok) {
   if (!S.photos) return;
   // Une image fixe par réaction (cf. applyTheme) : changer le src d'une seule image
@@ -381,7 +409,7 @@ function renderSettings() {
   $('#set-sound').checked = S.sound;
   $('#set-vibrate').checked = S.vibrate;
   $('#set-photos').checked = S.photos;
-  $('#set-caca').checked = S.caca;
+  $('#set-theme').value = S.theme;
   $('#op-levels').innerHTML = Object.keys(OP_SYM).map((op) => `
     <div class="op-lvl"><span style="width:24px">${OP_SYM[op]}</span><span class="bar"><i style="width:${(opLevel(op) / MAX_LV) * 100}%"></i></span><span>${opLevel(op)}/${MAX_LV}</span></div>`).join('');
 }
@@ -392,9 +420,10 @@ $$('[data-op]').forEach((c) => c.addEventListener('change', () => {
 }));
 $('#set-sound').addEventListener('change', (e) => { S.sound = e.target.checked; save(); });
 $('#set-photos').addEventListener('change', (e) => { S.photos = e.target.checked; save(); });
-$('#set-caca').addEventListener('change', (e) => {
-  S.caca = e.target.checked; save(); applyTheme();
-  if (S.caca) { prout(); toast('💩 Bienvenue dans Cacalcul !'); }
+$('#set-theme').addEventListener('change', (e) => {
+  S.theme = e.target.value; save(); applyTheme();
+  if (S.theme === 'caca') { prout(); toast('💩 Bienvenue dans Cacalcul !'); }
+  if (S.theme === 'anneaux') { cor(1.2); toast('💍 Un calcul pour les gouverner tous !'); }
 });
 $('#set-vibrate').addEventListener('change', (e) => { S.vibrate = e.target.checked; save(); if (S.vibrate) buzz(50); });
 $('#reset').addEventListener('click', () => {
@@ -600,8 +629,8 @@ function answer(ok, timeout = false) {
     $('#answer').classList.add('ok');
     const fb = $('#feedback');
     fb.className = 'feedback' + (rt < 1.2 ? ' fast' : '');
-    fb.textContent = rt < 1 ? (S.caca ? `💩 ${rt.toFixed(2)} s — CACA ÉCLAIR !` : `⚡ ${rt.toFixed(2)} s — ÉCLAIR !`) : rt < 2 ? `${rt.toFixed(2)} s — rapide !` : `${rt.toFixed(2)} s`;
-    floatText(`+${pts}${S.caca ? ' 💩' : ''}`);
+    fb.textContent = rt < 1 ? `${TH().fast} ${rt.toFixed(2)} s — ${TH().fastTxt} !` : rt < 2 ? `${rt.toFixed(2)} s — rapide !` : `${rt.toFixed(2)} s`;
+    floatText(`+${pts}${TH().plus}`);
     reaction(true);
     bumpScore();
     SFX.ok(G.combo);
@@ -666,7 +695,7 @@ function renderCombo() {
   const c = $('#combo');
   const m = multFor(G.combo);
   c.className = 'combo' + (m >= 2 ? ' x4' : m > 1 ? ' x2' : '');
-  c.textContent = G.combo >= 3 ? `${m >= 2 ? (S.caca ? '💩 ' : '🔥 ') : ''}COMBO ${G.combo}${m > 1 ? ` · ×${String(m).replace('.', ',')}` : ''}` : '';
+  c.textContent = G.combo >= 3 ? `${m >= 2 ? TH().fire + ' ' : ''}COMBO ${G.combo}${m > 1 ? ` · ×${String(m).replace('.', ',')}` : ''}` : '';
   $('#stage').classList.toggle('fire', m >= 2);
 }
 function bumpScore() {
@@ -685,8 +714,9 @@ function sparks(n) {
   const colors = ['#ffd23f', '#ff3d81', '#00e5ff', '#3dffa2', '#a66bff'];
   for (let i = 0; i < n; i++) {
     const s = document.createElement('div');
-    s.className = S.caca ? 'spark poop' : 'spark';
-    if (S.caca) s.textContent = '💩';
+    const emo = TH().spark;
+    s.className = emo ? 'spark emo' : 'spark';
+    if (emo) s.textContent = emo[i % emo.length];
     const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 90;
     s.style.left = '50%'; s.style.top = '55%';
     s.style.background = colors[i % colors.length];
@@ -785,7 +815,7 @@ function endGame() {
   const labels = { sprint: 'Sprint 60 s', survie: 'Survie', daily: 'Défi du jour', trick: G.trick && G.trick.name };
   $('#res-mode').textContent = labels[mode];
   $('#res-record').classList.toggle('show', record);
-  const party = S.caca ? '💩' : '🎉';
+  const party = TH().party;
   $('#res-record').textContent = mode === 'trick' ? `${party} NOUVEAU RECORD D'ÉTOILES !` : `${party} NOUVEAU RECORD !`;
   $('#res-score').textContent = mode === 'trick' ? `${G.correct}/${TRICK_Q}` : '0';
   $('#res-stars').textContent = mode === 'trick' ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '';
@@ -824,22 +854,33 @@ function countUp(el, target) {
    ========================================================= */
 // ---------- Thème ----------
 const LOGO_NORMAL = $('#logo').innerHTML;
-$$('.mode-ico').forEach((e) => { e.dataset.normal = e.textContent; });
+const THEMES = {
+  eclair: { name: 'Calcul Éclair', color: '#0d0b1e', logo: LOGO_NORMAL, photos: PHOTO,
+    fast: '⚡', fastTxt: 'ÉCLAIR', plus: '', fire: '🔥', party: '🎉', spark: null, bg: null },
+  caca: { name: 'Cacalcul', color: '#1c120a', logo: 'CACA<span>LCUL</span><br>💩', photos: CACA,
+    fast: '💩', fastTxt: 'CACA ÉCLAIR', plus: ' 💩', fire: '💩', party: '💩', spark: ['💩'],
+    bg: ['💩', '💩', '💩', '🧻', '🚽', '🪰'] },
+  anneaux: { name: 'Le Calcul des Anneaux', color: '#0e1510', logo: 'LE CALCUL<br><span>DES ANNEAUX</span><br>💍', photos: ANNEAUX,
+    fast: '💍', fastTxt: 'MON PRÉCIEUX', plus: ' ✨', fire: '🌋', party: '👑', spark: ['✨', '💍', '✨', '🍃'],
+    bg: ['💍', '🌋', '🗡️', '🏹', '🧙', '🌲', '🏔️', '🐉', '🍃', '🛡️'] },
+};
+const TH = () => THEMES[S.theme] || THEMES.eclair;
+$$('.mode-ico').forEach((e) => { e.dataset.eclair = e.textContent; });
 function applyTheme() {
-  document.body.classList.toggle('caca', S.caca);
-  document.title = S.caca ? 'Cacalcul' : 'Calcul Éclair';
-  $('meta[name=theme-color]').content = S.caca ? '#1c120a' : '#0d0b1e';
-  $('#logo').innerHTML = S.caca ? 'CACA<span>LCUL</span><br>💩' : LOGO_NORMAL;
-  const set = S.caca ? CACA : PHOTO;
-  $('#reaction-ok').src = set.ok.src;
-  $('#reaction-bad').src = set.bad.src;
-  $$('.mode-ico').forEach((e) => { e.textContent = S.caca ? e.dataset.caca : e.dataset.normal; });
-  const bg = $('#caca-bg');
-  if (S.caca && !bg.childElementCount) {
-    const emo = ['💩', '💩', '💩', '🧻', '🚽', '🪰'];
+  const th = TH();
+  Object.keys(THEMES).forEach((k) => document.body.classList.toggle(k, k === S.theme && k !== 'eclair'));
+  document.title = th.name;
+  $('meta[name=theme-color]').content = th.color;
+  $('#logo').innerHTML = th.logo;
+  $('#reaction-ok').src = th.photos.ok.src;
+  $('#reaction-bad').src = th.photos.bad.src;
+  $$('.mode-ico').forEach((e) => { e.textContent = e.dataset[S.theme] || e.dataset.eclair; });
+  const bg = $('#theme-bg');
+  bg.textContent = '';
+  if (th.bg) {
     for (let i = 0; i < 16; i++) {
       const s = document.createElement('span');
-      s.textContent = emo[i % emo.length];
+      s.textContent = th.bg[i % th.bg.length];
       s.style.left = `${Math.random() * 92}%`; s.style.top = `${Math.random() * 92}%`;
       s.style.fontSize = `${24 + Math.random() * 30}px`;
       s.style.setProperty('--t', `${8 + Math.random() * 10}s`);

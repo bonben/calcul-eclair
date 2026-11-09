@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6c8" stop-opacity=".9"/><stop offset=".55" stop-color="#f2c94c" stop-opacity=".35"/><stop offset="1" stop-color="#f2c94c" stop-opacity="0"/></radialGradient>
+    <linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b0"/><stop offset=".35" stop-color="#f2c94c"/><stop offset=".7" stop-color="#b8861f"/><stop offset="1" stop-color="#f7dc7c"/></linearGradient>
+    <linearGradient id="or2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a5f12"/><stop offset=".5" stop-color="#d9a93a"/><stop offset="1" stop-color="#7a520e"/></linearGradient>
+  </defs>
+  <circle cx="100" cy="104" r="96" fill="url(#halo)"/>
+  <!-- anneau vu de trois quarts -->
+  <ellipse cx="100" cy="112" rx="66" ry="46" fill="none" stroke="url(#or2)" stroke-width="26"/>
+  <ellipse cx="100" cy="106" rx="66" ry="46" fill="none" stroke="url(#or)" stroke-width="22"/>
+  <ellipse cx="100" cy="106" rx="66" ry="46" fill="none" stroke="#5a3d08" stroke-width="2" opacity=".5"/>
+  <!-- inscription lumineuse (motif décoratif) -->
+  <path d="M52 92c6-6 10 2 16-4s8 4 14-2 10 2 16-3 9 3 15-2 9 3 15-2 8 4 14 0" fill="none" stroke="#ff9a3c" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+  <path d="M60 130c6 4 10-3 16 2s9-3 15 1 9-3 15 1 9-3 15 1 8-3 13 0" fill="none" stroke="#ff9a3c" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+  <!-- reflets -->
+  <path d="M58 82c10-12 30-20 46-21" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <!-- étincelles -->
+  <g fill="#fffbe6">
+    <path d="M30 40l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/>
+    <path d="M168 50l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/>
+    <path d="M160 160l3 8 8 3-8 3-3 8-3-8-8-3 8-3z"/>
+    <path d="M38 160l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>
+  </g>
+</svg>

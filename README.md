@@ -25,6 +25,11 @@ La progression est enregistrée sur le téléphone.
 - **Défi du jour** : 20 calculs, les mêmes pour tout le monde ce jour-là. Un seul essai par jour : l'essai compte dès le départ, même si on quitte en cours.
 - **Astuces de pro** : 10 techniques de calcul mental (×11, ×5, ×9, compléments à 100, carrés en 5…), chacune suivie de 10 calculs pour s'entraîner, notés sur 3 étoiles.
 
+## Thèmes
+
+Dans les réglages : **Calcul Éclair** ⚡ (par défaut), **Cacalcul** 💩 et **Le Calcul des Anneaux** 💍
+(couleurs or et forêt, anneau et œil de feu en réactions, harpe, cor et tambour, titres de la Comté au Seigneur des Nombres).
+
 ## Méthodes utilisées
 
 - **Difficulté adaptative** : le niveau de chaque opération s'ajuste pour viser environ 90 % de réussite. Pendant les 25 premières réponses de chaque opération, il monte plus vite pour trouver le bon niveau.

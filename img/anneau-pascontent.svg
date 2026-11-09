@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="feu" cx=".5" cy=".55" r=".5"><stop offset="0" stop-color="#ffe680"/><stop offset=".35" stop-color="#ff9a1f"/><stop offset=".7" stop-color="#e0400e"/><stop offset="1" stop-color="#7a1204" stop-opacity="0"/></radialGradient>
+    <radialGradient id="iris" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3a0"/><stop offset=".5" stop-color="#ffb21f"/><stop offset="1" stop-color="#d4420c"/></radialGradient>
+  </defs>
+  <!-- flammes -->
+  <path d="M100 6c8 22 22 18 26 40 10-12 26-10 30-26 8 24 4 40 18 52 6 18-4 34 4 52-14 2-18 22-34 26-8 12-28 20-44 20s-36-8-44-20c-16-4-20-24-34-26 8-18-2-34 4-52 14-12 10-28 18-52 4 16 20 14 30 26 4-22 18-18 26-40z" fill="url(#feu)"/>
+  <!-- œil -->
+  <path d="M18 108c26-34 56-50 82-50s56 16 82 50c-26 34-56 50-82 50s-56-16-82-50z" fill="#3a0a02" stroke="#1c0400" stroke-width="5"/>
+  <ellipse cx="100" cy="108" rx="58" ry="40" fill="url(#iris)"/>
+  <!-- pupille fendue -->
+  <path d="M100 66c-9 14-11 28-11 42s2 28 11 42c9-14 11-28 11-42s-2-28-11-42z" fill="#0d0200"/>
+  <!-- sourcils froncés -->
+  <path d="M26 66l58 18" stroke="#1c0400" stroke-width="10" stroke-linecap="round"/>
+  <path d="M174 66l-58 18" stroke="#1c0400" stroke-width="10" stroke-linecap="round"/>
+</svg>
