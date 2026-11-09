@@ -230,7 +230,7 @@ body.caca {
   background: radial-gradient(120% 80% at 50% 0%, #4a2f14 0%, var(--bg) 60%) fixed, var(--bg);
 }
 #theme-bg { display: none; position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-body.caca #theme-bg, body.anneaux #theme-bg { display: block; }
+body.caca #theme-bg, body.anneaux #theme-bg, body.galaxie #theme-bg, body.sorcier #theme-bg { display: block; }
 #theme-bg span { position: absolute; opacity: .13; animation: drift var(--t) ease-in-out infinite alternate; }
 @keyframes drift { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); } }
 #app { z-index: 1; }
@@ -263,6 +263,50 @@ body.anneaux {
 .anneaux .btn-big { background: linear-gradient(90deg, #a8781e, #e2b84a); color: #1f1806; box-shadow: 0 6px 0 #4a3510; }
 .anneaux .xpfill { background: linear-gradient(90deg, #7fb069, #f2c94c); }
 .anneaux .res-score { background: linear-gradient(90deg, #f7dc7c, #c8962c); -webkit-background-clip: text; background-clip: text; }
+
+/* ---------- Thème Calcul Wars ✨ ---------- */
+body.galaxie {
+  --bg: #03040a; --bg2: #0a0d1c; --card: #11152a; --line: #252b4d;
+  --text: #f2f4ff; --muted: #8f97c4;
+  --pink: #ff3b3b; --cyan: #4fc3ff; --green: #5dff6a; --purple: #6a5cff; --orange: #ffb020; --yellow: #ffe81f;
+  background:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 72% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 40% 42%, #cfe3ff 50%, transparent 51%), radial-gradient(1px 1px at 88% 36%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 66%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 62% 74%, #ffeedd 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 90%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 94% 88%, #fff 50%, transparent 51%),
+    radial-gradient(120% 70% at 50% 0%, #1a1440 0%, var(--bg) 60%) fixed, var(--bg);
+  background-size: 180px 180px, 230px 230px, 260px 260px, 200px 200px, 210px 210px, 270px 270px, 190px 190px, 240px 240px, auto, auto;
+}
+.galaxie #theme-bg span { opacity: .12; }
+.galaxie .logo { font-family: "Arial Black", Impact, system-ui, sans-serif; font-style: normal; font-size: 40px; letter-spacing: 4px; color: transparent; -webkit-text-stroke: 2px #ffe81f; }
+.galaxie .logo span { color: #ffe81f; -webkit-text-stroke: 0; background: none; font-size: 54px; text-shadow: 0 0 16px rgba(255, 232, 31, .45); }
+.galaxie .mode-sprint { background: linear-gradient(135deg, #0b3d91, #4fc3ff); }
+.galaxie .mode-survie { background: linear-gradient(135deg, #3a0008, #e01b24); }
+.galaxie .mode-daily  { background: linear-gradient(135deg, #1d6b2a, #5dff6a); color: #04210a; }
+.galaxie .mode-tricks { background: linear-gradient(135deg, #3b2e8a, #a08cff); }
+.galaxie .lvl-badge { background: #ffe81f; color: #1a1600; }
+.galaxie .btn-big { background: linear-gradient(90deg, #4fc3ff, #b8ecff); color: #03132a; box-shadow: 0 6px 0 #0b3d91, 0 0 22px rgba(79, 195, 255, .45); }
+.galaxie .xpfill { background: linear-gradient(90deg, #4fc3ff, #e8f8ff); box-shadow: 0 0 10px #4fc3ff; }
+.galaxie .res-score { background: linear-gradient(90deg, #ffe81f, #ffb020); -webkit-background-clip: text; background-clip: text; }
+
+/* ---------- Thème Calculus Magicus 🪄 ---------- */
+body.sorcier {
+  --bg: #1a0b0e; --bg2: #24111a; --card: #2e1520; --line: #4a2633;
+  --text: #f7ecd4; --muted: #c4a98a;
+  --pink: #d4a23a; --cyan: #9fb8d8; --green: #4c9a6a; --purple: #7a1f2b; --orange: #d4a23a; --yellow: #f0c75e;
+  background: radial-gradient(120% 80% at 50% 0%, #4a1622 0%, var(--bg) 60%) fixed, var(--bg);
+}
+.sorcier #theme-bg span { opacity: .11; }
+.sorcier .logo { font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-size: 38px; letter-spacing: 2px; color: #f0c75e; }
+.sorcier .logo span { background: linear-gradient(90deg, #b8862a, #ffe9a8, #d4a23a, #ffe9a8, #b8862a); -webkit-background-clip: text; background-clip: text; }
+.sorcier .mode-sprint { background: linear-gradient(135deg, #740001, #ae0001); }
+.sorcier .mode-survie { background: linear-gradient(135deg, #0d3b22, #2a7a4a); }
+.sorcier .mode-daily  { background: linear-gradient(135deg, #1a2a5e, #3b5ba8); color: #fff; }
+.sorcier .mode-tricks { background: linear-gradient(135deg, #e0b83a, #f5dc7a); color: #2a1e04; }
+.sorcier .lvl-badge { background: linear-gradient(90deg, #740001, #ae0001); color: #f0c75e; }
+.sorcier .btn-big { background: linear-gradient(90deg, #b8862a, #f0c75e); color: #2a0a0e; box-shadow: 0 6px 0 #5a0a14; }
+.sorcier .xpfill { background: linear-gradient(90deg, #ae0001, #f0c75e); }
+.sorcier .res-score { background: linear-gradient(90deg, #ffe9a8, #d4a23a); -webkit-background-clip: text; background-clip: text; }
 
 .toast { position: absolute; left: 16px; right: 16px; bottom: calc(24px + var(--safe-bot)); background: var(--yellow); color: #231400; font-weight: 900; padding: 12px 14px; border-radius: 14px; text-align: center; transform: translateY(calc(100% + 80px)); transition: transform .3s; z-index: 10; }
 .toast.show { transform: none; }

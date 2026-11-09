@@ -36,7 +36,7 @@ const DEFAULT_STATE = {
   sound: true,
   vibrate: true,
   photos: true,
-  theme: 'eclair',       // eclair | caca | anneaux
+  theme: 'eclair',       // eclair | caca | anneaux | galaxie | sorcier
   best: { sprint: 0, survie: 0 },
   daily: { day: '', best: 0 },
   tricks: {},            // id -> étoiles (0..3)
@@ -89,7 +89,11 @@ const CACA_TITLES = [[1, 'Petit pet'], [3, 'Crotte'], [5, 'Bouse'], [8, 'Caca ne
   [16, 'Tsunami de caca'], [20, 'Boss des toilettes'], [25, 'Légende du trône'], [30, 'Divinité du caca']];
 const ANNEAUX_TITLES = [[1, 'Hobbit de la Comté'], [3, 'Compagnon de route'], [5, 'Rôdeur du Nord'], [8, 'Archer elfe'],
   [12, 'Gardien du Gouffre'], [16, 'Cavalier du Rohan'], [20, 'Magicien gris'], [25, 'Magicien blanc'], [30, 'Seigneur des Nombres']];
-const titleFor = (lvl) => ({ caca: CACA_TITLES, anneaux: ANNEAUX_TITLES }[S.theme] || TITLES).filter(([l]) => lvl >= l).pop()[1];
+const GALAXIE_TITLES = [[1, 'Jeune padawan'], [3, 'Pilote de chasseur'], [5, 'Contrebandier de l\'espace'], [8, 'Chevalier Jedi'],
+  [12, 'Maître Jedi'], [16, 'Membre du Conseil'], [20, 'Grand Maître'], [25, 'Légende de la galaxie'], [30, 'Maître de la Force']];
+const SORCIER_TITLES = [[1, 'Élève de première année'], [3, 'Apprenti sorcier'], [5, 'Attrapeur'], [8, 'Préfet'],
+  [12, 'Préfet-en-chef'], [16, 'Auror'], [20, 'Professeur de potions'], [25, 'Directeur de l\'école'], [30, 'Plus grand sorcier de tous les temps']];
+const titleFor = (lvl) => ({ caca: CACA_TITLES, anneaux: ANNEAUX_TITLES, galaxie: GALAXIE_TITLES, sorcier: SORCIER_TITLES }[S.theme] || TITLES).filter(([l]) => lvl >= l).pop()[1];
 
 /* =========================================================
    Génération des calculs (difficulté adaptative)
@@ -280,15 +284,70 @@ function cor(len = 0.6) {
   filt.connect(g).connect(ac.destination);
 }
 function tambour() { tone(110, 0.5, 'sine', 0.4, 0, 40); tone(90, 0.6, 'sine', 0.35, 0.28, 35); }
+// Sons du thème Calcul Wars : tir de laser, sabre, explosion
+function laser(combo) {
+  const f = 1400 * Math.pow(2, Math.min(combo, 24) / 36);
+  tone(f, 0.16, 'square', 0.1, 0, f / 6); tone(f * 0.75, 0.14, 'sawtooth', 0.05, 0.03, f / 8);
+}
+function sabre(len = 0.7) {
+  const ac = audio(); if (!ac) return;
+  const t = ac.currentTime;
+  const o = ac.createOscillator(), o2 = ac.createOscillator(), lfo = ac.createOscillator(), lfoGain = ac.createGain();
+  const filt = ac.createBiquadFilter(), g = ac.createGain();
+  o.type = 'sawtooth'; o2.type = 'sawtooth';
+  o.frequency.setValueAtTime(90, t); o2.frequency.setValueAtTime(91.5, t);
+  o.frequency.linearRampToValueAtTime(140, t + 0.12); o.frequency.linearRampToValueAtTime(70, t + len);
+  lfo.frequency.value = 6; lfoGain.gain.value = 8; lfo.connect(lfoGain).connect(o.frequency);
+  filt.type = 'lowpass'; filt.frequency.value = 700; filt.Q.value = 3;
+  g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.28, t + 0.05);
+  g.gain.setValueAtTime(0.24, t + len * 0.6); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  o.connect(filt); o2.connect(filt); filt.connect(g).connect(ac.destination);
+  [o, o2, lfo].forEach((x) => { x.start(t); x.stop(t + len + 0.05); });
+}
+function boum() {
+  const ac = audio(); if (!ac) return;
+  const t = ac.currentTime, len = 0.9;
+  const buf = ac.createBuffer(1, ac.sampleRate * len, ac.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+  const src = ac.createBufferSource(), filt = ac.createBiquadFilter(), g = ac.createGain();
+  src.buffer = buf; filt.type = 'lowpass'; filt.frequency.setValueAtTime(900, t); filt.frequency.exponentialRampToValueAtTime(120, t + len);
+  g.gain.value = 0.5; src.connect(filt).connect(g).connect(ac.destination); src.start(t);
+  tone(80, 0.5, 'sine', 0.35, 0, 35);
+}
+// Sons du thème Calculus Magicus : scintillement de baguette, potion ratée, coup de tonnerre
+function magie(combo) {
+  const base = 880 * Math.pow(2, Math.min(combo, 24) / 36);
+  [0, 4, 7, 12, 16].forEach((st, i) => tone(base * Math.pow(2, st / 12), 0.25, 'sine', 0.09, i * 0.035));
+}
+function rate() {
+  const ac = audio(); if (!ac) return;
+  const t = ac.currentTime, len = 0.7;
+  const o = ac.createOscillator(), lfo = ac.createOscillator(), lfoGain = ac.createGain(), g = ac.createGain();
+  o.type = 'triangle'; o.frequency.setValueAtTime(420, t); o.frequency.exponentialRampToValueAtTime(140, t + len);
+  lfo.frequency.value = 9; lfoGain.gain.value = 25; lfo.connect(lfoGain).connect(o.frequency);
+  g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.22, t + 0.04); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  o.connect(g).connect(ac.destination);
+  [o, lfo].forEach((x) => { x.start(t); x.stop(t + len + 0.05); });
+  [0.15, 0.3, 0.42].forEach((d) => tone(300 + Math.random() * 200, 0.06, 'sine', 0.12, d, 900)); // bulles
+}
+function tonnerre() {
+  const ac = audio(); if (!ac) return;
+  const t = ac.currentTime, len = 1.1;
+  const buf = ac.createBuffer(1, ac.sampleRate * len, ac.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3) * (i < ac.sampleRate * 0.05 ? 1.5 : 1);
+  const src = ac.createBufferSource(), filt = ac.createBiquadFilter(), g = ac.createGain();
+  src.buffer = buf; filt.type = 'lowpass'; filt.frequency.setValueAtTime(3000, t); filt.frequency.exponentialRampToValueAtTime(200, t + len);
+  g.gain.value = 0.45; src.connect(filt).connect(g).connect(ac.destination); src.start(t);
+}
 const SFX = {
-  ok: (combo) => { if (S.theme === 'caca') return plop(combo); if (S.theme === 'anneaux') return harpe(combo); const f = 520 * Math.pow(2, Math.min(combo, 24) / 24); tone(f, 0.09, 'triangle', 0.2); tone(f * 1.5, 0.12, 'triangle', 0.12, 0.05); },
-  bad: () => (S.theme === 'caca' ? prout() : S.theme === 'anneaux' ? cor() : tone(180, 0.28, 'sawtooth', 0.14, 0, 80)),
+  ok: (combo) => { if (S.theme === 'caca') return plop(combo); if (S.theme === 'anneaux') return harpe(combo); if (S.theme === 'galaxie') return laser(combo); if (S.theme === 'sorcier') return magie(combo); const f = 520 * Math.pow(2, Math.min(combo, 24) / 24); tone(f, 0.09, 'triangle', 0.2); tone(f * 1.5, 0.12, 'triangle', 0.12, 0.05); },
+  bad: () => (S.theme === 'caca' ? prout() : S.theme === 'anneaux' ? cor() : S.theme === 'galaxie' ? sabre() : S.theme === 'sorcier' ? rate() : tone(180, 0.28, 'sawtooth', 0.14, 0, 80)),
   tier: () => [0, 4, 7, 12].forEach((s, i) => tone(660 * Math.pow(2, s / 12), 0.12, 'square', 0.08, i * 0.06)),
   tick: () => tone(1000, 0.03, 'square', 0.05),
   count: () => tone(440, 0.12, 'square', 0.1),
   go: () => tone(880, 0.25, 'square', 0.12),
   end: () => [0, 4, 7, 12, 16].forEach((s, i) => tone(523 * Math.pow(2, s / 12), 0.18, 'triangle', 0.15, i * 0.09)),
-  life: () => { if (S.theme === 'caca') return prout(0.7); if (S.theme === 'anneaux') return tambour(); tone(300, 0.15, 'square', 0.12); tone(200, 0.3, 'square', 0.12, 0.12); },
+  life: () => { if (S.theme === 'caca') return prout(0.7); if (S.theme === 'anneaux') return tambour(); if (S.theme === 'galaxie') return boum(); if (S.theme === 'sorcier') return tonnerre(); tone(300, 0.15, 'square', 0.12); tone(200, 0.3, 'square', 0.12, 0.12); },
 };
 // ---------- Photos réactions ----------
 const PHOTO = { ok: new Image(), bad: new Image() };
@@ -300,6 +359,12 @@ CACA.bad.src = 'img/caca-pascontent.svg';
 const ANNEAUX = { ok: new Image(), bad: new Image() };
 ANNEAUX.ok.src = 'img/anneau-content.svg';
 ANNEAUX.bad.src = 'img/anneau-pascontent.svg';
+const GALAXIE = { ok: new Image(), bad: new Image() };
+GALAXIE.ok.src = 'img/sabre-content.svg';
+GALAXIE.bad.src = 'img/sabre-pascontent.svg';
+const SORCIER = { ok: new Image(), bad: new Image() };
+SORCIER.ok.src = 'img/baguette-content.svg';
+SORCIER.bad.src = 'img/baguette-pascontent.svg';
 function reaction(ok) {
   if (!S.photos) return;
   // Une image fixe par réaction (cf. applyTheme) : changer le src d'une seule image
@@ -424,6 +489,8 @@ $('#set-theme').addEventListener('change', (e) => {
   S.theme = e.target.value; save(); applyTheme();
   if (S.theme === 'caca') { prout(); toast('💩 Bienvenue dans Cacalcul !'); }
   if (S.theme === 'anneaux') { cor(1.2); toast('💍 Un calcul pour les gouverner tous !'); }
+  if (S.theme === 'galaxie') { sabre(1.1); toast('✨ Que le calcul soit avec toi !'); }
+  if (S.theme === 'sorcier') { magie(12); toast('🦉 Ta lettre d\'admission est arrivée !'); }
 });
 $('#set-vibrate').addEventListener('change', (e) => { S.vibrate = e.target.checked; save(); if (S.vibrate) buzz(50); });
 $('#reset').addEventListener('click', () => {
@@ -863,6 +930,12 @@ const THEMES = {
   anneaux: { name: 'Le Calcul des Anneaux', color: '#0e1510', logo: 'LE CALCUL<br><span>DES ANNEAUX</span><br>💍', photos: ANNEAUX,
     fast: '💍', fastTxt: 'MON PRÉCIEUX', plus: ' ✨', fire: '🌋', party: '👑', spark: ['✨', '💍', '✨', '🍃'],
     bg: ['💍', '🌋', '🗡️', '🏹', '🧙', '🌲', '🏔️', '🐉', '🍃', '🛡️'] },
+  galaxie: { name: 'Calcul Wars', color: '#03040a', logo: 'CALCUL<br><span>WARS</span><br>✨', photos: GALAXIE,
+    fast: '🚀', fastTxt: 'VITESSE LUMIÈRE', plus: ' ⭐', fire: '💫', party: '🌟', spark: ['⭐', '✨', '💫'],
+    bg: ['🚀', '🪐', '🛸', '🌑', '🤖', '👽', '🛰️', '☄️', '🌌', '⭐'] },
+  sorcier: { name: 'Calculus Magicus', color: '#1a0b0e', logo: 'CALCULUS<br><span>MAGICUS</span><br>🪄', photos: SORCIER,
+    fast: '🪄', fastTxt: 'EXPELLIARMUS', plus: ' ✨', fire: '⚡', party: '🏆', spark: ['✨', '⭐', '⚡'],
+    bg: ['🪄', '🦉', '🧹', '⚡', '🕯️', '🏰', '📜', '🔮', '🧪', '🐍', '🦁', '🦅', '🦡', '🎩'] },
 };
 const TH = () => THEMES[S.theme] || THEMES.eclair;
 $$('.mode-ico').forEach((e) => { e.dataset.eclair = e.textContent; });

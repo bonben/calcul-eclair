@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="fonte" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#15161a"/><stop offset=".4" stop-color="#4a4d56"/><stop offset="1" stop-color="#101114"/></linearGradient>
+  </defs>
+  <!-- fumée verte -->
+  <g fill="#7ac74f" opacity=".55">
+    <circle cx="84" cy="66" r="22"/><circle cx="112" cy="52" r="26"/><circle cx="96" cy="28" r="18"/><circle cx="128" cy="22" r="14"/>
+  </g>
+  <!-- chaudron -->
+  <ellipse cx="100" cy="94" rx="64" ry="14" fill="#2a2c33"/>
+  <path d="M38 96c0 52 26 78 62 78s62-26 62-78z" fill="url(#fonte)" stroke="#000" stroke-width="3"/>
+  <ellipse cx="100" cy="94" rx="58" ry="11" fill="#5fae3a"/>
+  <!-- potion qui déborde -->
+  <path d="M52 98c-4 14 4 20 0 34 8-4 8-18 6-30zM142 100c6 10-2 22 4 30 4-10 4-22-2-30z" fill="#5fae3a"/>
+  <g fill="#b8f08a"><circle cx="78" cy="90" r="6"/><circle cx="118" cy="92" r="8"/><circle cx="100" cy="88" r="4"/></g>
+  <!-- yeux et bouche dépités -->
+  <g fill="#fff"><ellipse cx="80" cy="126" rx="10" ry="12"/><ellipse cx="120" cy="126" rx="10" ry="12"/></g>
+  <g fill="#000"><circle cx="80" cy="130" r="5"/><circle cx="120" cy="130" r="5"/></g>
+  <path d="M66 110l22 8M134 110l-22 8" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+  <path d="M84 156c8-8 24-8 32 0" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+  <!-- pieds -->
+  <g fill="#15161a"><rect x="56" y="166" width="14" height="22" rx="4"/><rect x="130" y="166" width="14" height="22" rx="4"/></g>
+</svg>

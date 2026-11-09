@@ -27,8 +27,10 @@ La progression est enregistrée sur le téléphone.
 
 ## Thèmes
 
-Dans les réglages : **Calcul Éclair** ⚡ (par défaut), **Cacalcul** 💩 et **Le Calcul des Anneaux** 💍
-(couleurs or et forêt, anneau et œil de feu en réactions, harpe, cor et tambour, titres de la Comté au Seigneur des Nombres).
+Dans les réglages : **Calcul Éclair** ⚡ (par défaut), **Cacalcul** 💩, **Le Calcul des Anneaux** 💍, **Calcul Wars** ✨ et **Calculus Magicus** 🪄
+(couleurs or et forêt, anneau et œil de feu en réactions, harpe, cor et tambour, titres de la Comté au Seigneur des Nombres) ;
+Calcul Wars : ciel étoilé, sabres bleu et rouge en réactions, laser, sabre et explosion, de padawan à Maître de la Force ;
+Calculus Magicus : bordeaux et or, baguette étincelante et chaudron raté en réactions, de première année au plus grand sorcier de tous les temps.
 
 ## Méthodes utilisées
 
